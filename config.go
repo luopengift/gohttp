@@ -5,8 +5,8 @@ type Config struct {
 	ReadTimeout    int
 	WriteTimeout   int
 	MaxHeaderBytes int
-	certFile       string
-	keyFile        string
+	CertFile       string
+	KeyFile        string
 }
 
 func NewConfig(addr string, read, write, maxheader int) *Config {
@@ -15,7 +15,7 @@ func NewConfig(addr string, read, write, maxheader int) *Config {
 		ReadTimeout:    read,
 		WriteTimeout:   write,
 		MaxHeaderBytes: maxheader,
-		certFile:       "",
-		keyFile:        "",
+		CertFile:       "",
+		KeyFile:        "",
 	}
 }

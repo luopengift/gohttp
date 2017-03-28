@@ -11,7 +11,7 @@ func Test_web(t *testing.T) {
 	fmt.Println("start...")
 	Start(&Config{
 		Addr:     ":9999",
-		certFile: "./server.cert",
-		keyFile:  "./server.key",
+		CertFile: "./server.cert",
+		KeyFile:  "./server.key",
 	})
 }

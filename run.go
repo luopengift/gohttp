@@ -19,8 +19,8 @@ func Start(config *Config) {
 		WriteTimeout:   time.Duration(config.WriteTimeout) * time.Second,
 		MaxHeaderBytes: config.MaxHeaderBytes,
 	}
-	if config.certFile != "" && config.keyFile != "" {
-		server.ListenAndServeTLS(config.certFile, config.keyFile)
+	if config.CertFile != "" && config.KeyFile != "" {
+		server.ListenAndServeTLS(config.CertFile, config.KeyFile)
 	} else {
 		server.ListenAndServe()
 	}

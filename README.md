@@ -31,8 +31,8 @@ func main() {
     gohttp.RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
     gohttp.Start(&gohttp.Config{
         Addr:     ":9999",
-        certFile: "./server.cert",
-        keyFile:  "./server.key",
+        CertFile: "./server.cert",
+        KeyFile:  "./server.key",
     })
 }
 ```
