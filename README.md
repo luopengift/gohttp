@@ -1,2 +1,5 @@
 # gohttp
-go http framework
+simple http framework for golang
+
+### 模拟tornado
+
