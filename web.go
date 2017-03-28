@@ -9,22 +9,7 @@ import (
 	"time"
 )
 
-var (
-	SUPPORTED_METHODS = [7]string{
-		"GET",
-		"HEAD",
-		"POST",
-		"DELETE",
-		"PATCH",
-		"PUT",
-		"OPTIONS",
-	}
-)
-
 type RequestHandler struct {
-	//query_arguments []string
-	//get_arguments   []string
-	//post_arguments  []string
 	matchArgs map[string]string
 	queryArgs map[string][]string
 	bodyArgs  []byte

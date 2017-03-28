@@ -10,7 +10,6 @@ package main
 
 import (
     "github.com/luopengift/gohttp"
-    "fmt"
 )
 //Handler方法实现
 type Test struct {

@@ -1,9 +1,6 @@
 package gohttp
 
-import (
-	"easyWork/framework/logs"
-	"fmt"
-)
+import ()
 
 type Test struct {
 	HttpHandler
@@ -19,16 +16,9 @@ func (self *Test) GET() {
 		self.Output([]byte(k + ":" + v[0] + "\n"))
 	}
 	self.Output([]byte(self.GetQueryArg("a")))
-	logs.Info(self.GetHeader("Accept"))
-	logs.Info(self.Request().Header)
 }
 
 func (self *Test) POST() {
-	logs.Info(self.GetHeader("Accept"))
-	logs.Info(self.Request().Header)
-	fmt.Println("match", self.GetMatchArgs())
-	fmt.Println("query", self.GetQueryArgs())
-	fmt.Println("body", string(self.GetBodyArgs()))
 	self.Output([]byte(self.Request().PostFormValue("id")))
 	self.Output([]byte("hello"))
 }
