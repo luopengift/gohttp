@@ -6,6 +6,7 @@ import (
 )
 
 type muxEntry reflect.Type
+
 var Router = map[*regexp.Regexp]muxEntry{}
 
 func RouterRegister(path string, handler Handler) {

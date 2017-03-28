@@ -5,8 +5,8 @@ import (
 )
 
 type Connection interface {
-    Request() *http.Request
-    Response() http.ResponseWriter
+	Request() *http.Request
+	Response() http.ResponseWriter
 }
 
 type Conn struct {
@@ -27,4 +27,3 @@ func (self *Conn) Response() http.ResponseWriter {
 func (self *Conn) Request() *http.Request {
 	return self.request
 }
-

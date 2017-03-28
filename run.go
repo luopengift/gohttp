@@ -3,7 +3,7 @@ package gohttp
 import (
 	"fmt"
 	"net/http"
-    "time"
+	"time"
 )
 
 func Start(config *Config) {
@@ -15,9 +15,9 @@ func Start(config *Config) {
 		WriteTimeout:   time.Duration(config.WriteTimeout) * time.Second,
 		MaxHeaderBytes: config.MaxHeaderBytes,
 	}
-    if config.certFile != "" && config.keyFile != "" {
-        server.ListenAndServeTLS(config.certFile,config.keyFile)
-    }else{
-        server.ListenAndServe()
-    }
+	if config.certFile != "" && config.keyFile != "" {
+		server.ListenAndServeTLS(config.certFile, config.keyFile)
+	} else {
+		server.ListenAndServe()
+	}
 }
