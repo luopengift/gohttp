@@ -15,5 +15,7 @@ func NewConfig(addr string, read, write, maxheader int) *Config {
 		ReadTimeout:    read,
 		WriteTimeout:   write,
 		MaxHeaderBytes: maxheader,
+		certFile:       "",
+		keyFile:        "",
 	}
 }

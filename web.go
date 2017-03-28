@@ -7,6 +7,8 @@ import (
 	"reflect"
 	"sync"
 	"time"
+
+	"html/template"
 )
 
 type RequestHandler struct {
@@ -126,4 +128,16 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 		}
 	}
 	return nil, nil
+}
+
+func (self *HttpHandler) Redirect(url string, code int) {
+	http.Redirect(self.Response(), self.Request(), url, code)
+}
+
+func (self *HttpHandler) Render(tpl string, data interface{}) error {
+	t, err := template.ParseFiles(tpl)
+	if err != nil {
+		return err
+	}
+	return t.Execute(self.Response(), data)
 }

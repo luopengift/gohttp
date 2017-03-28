@@ -3,11 +3,15 @@ package gohttp
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"os/exec"
 	"time"
 )
 
 func Start(config *Config) {
 	fmt.Println(Router)
+	path, _ := exec.LookPath(os.Args[0])
+	fmt.Println(path)
 	server := &http.Server{
 		Addr:           config.Addr,
 		Handler:        NewHttpHandler(),

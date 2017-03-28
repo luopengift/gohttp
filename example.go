@@ -7,15 +7,8 @@ type Test struct {
 }
 
 func (self *Test) GET() {
-	self.Output([]byte("Match query args-->\n"))
-	for k, v := range self.GetMatchArgs() {
-		self.Output([]byte(k + ":" + v + "\n"))
-	}
-	self.Output([]byte("query args-->\n"))
-	for k, v := range self.GetQueryArgs() {
-		self.Output([]byte(k + ":" + v[0] + "\n"))
-	}
-	self.Output([]byte(self.GetQueryArg("a")))
+	//	self.Redirect("http://www.baidu.com", 301)
+	self.Render("a.tpl", nil)
 }
 
 func (self *Test) POST() {

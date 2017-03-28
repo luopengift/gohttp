@@ -11,9 +11,10 @@ package main
 import (
     "github.com/luopengift/gohttp"
 )
+
 //Handler方法实现
 type Test struct {
-    HttpHandler
+    gohttp.HttpHandler
 }
 
 func (self *Test) GET() {
@@ -24,11 +25,11 @@ func (self *Test) POST() {
     self.Output([]byte("hello"))
 }
 
-//绑定路由
-gohttp.RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
 //启动服务
 func main() {
-    gohttp.Start(&Config{
+    //绑定路由
+    gohttp.RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
+    gohttp.Start(&gohttp.Config{
         Addr:     ":9999",
         certFile: "./server.cert",
         keyFile:  "./server.key",
