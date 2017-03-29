@@ -7,6 +7,7 @@ type Config struct {
 	MaxHeaderBytes int
 	CertFile       string
 	KeyFile        string
+	StaticPath     string
 }
 
 func NewConfig(addr string, read, write, maxheader int) *Config {
@@ -17,5 +18,6 @@ func NewConfig(addr string, read, write, maxheader int) *Config {
 		MaxHeaderBytes: maxheader,
 		CertFile:       "",
 		KeyFile:        "",
+		StaticPath:     ".",
 	}
 }

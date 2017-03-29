@@ -2,13 +2,14 @@ package gohttp
 
 import (
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"net/http"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
-
-	"html/template"
 )
 
 type RequestHandler struct {
@@ -101,6 +102,18 @@ func (self *HttpHandler) Output(o []byte) {
 func (self *HttpHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
 
+	if request.URL.Path == "/robots.txt" || request.URL.Path == "/favicon.ico" {
+		http.Error(response, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		goto END
+	}
+
+	if strings.HasPrefix(request.URL.Path, "/static") {
+		StaticPath := "."
+		file := filepath.Join(StaticPath, request.URL.Path)
+		http.ServeFile(response, request, file)
+		goto END
+	}
+
 	if match, entry := self.findHandle(request.URL.Path); match == nil {
 		http.Error(response, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	} else {
@@ -114,7 +127,8 @@ func (self *HttpHandler) ServeHTTP(response http.ResponseWriter, request *http.R
 		handle.MethodByName(request.Method).Call(nil)
 		handle.MethodByName("Finish").Call(nil)
 	}
-	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, time.Since(stime))
+END:
+	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, request.RemoteAddr,"->",request.Host, time.Since(stime))
 }
 
 func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
@@ -140,4 +154,8 @@ func (self *HttpHandler) Render(tpl string, data interface{}) error {
 		return err
 	}
 	return t.Execute(self.Response(), data)
+}
+
+func (self *HttpHandler) RemoteAddr() string {
+	return self.Request().RemoteAddr
 }
