@@ -99,27 +99,27 @@ func (self *HttpHandler) Output(o []byte) {
 	self.ResponseWriter.Write(o)
 }
 
-func (self *HttpHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
+func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
 
 	if request.URL.Path == "/robots.txt" || request.URL.Path == "/favicon.ico" {
-		http.Error(response, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		http.Error(responsewriter, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		goto END
 	}
 
 	if strings.HasPrefix(request.URL.Path, "/static") {
 		StaticPath := "."
 		file := filepath.Join(StaticPath, request.URL.Path)
-		http.ServeFile(response, request, file)
+		http.ServeFile(responsewriter, request, file)
 		goto END
 	}
 
 	if match, entry := self.findHandle(request.URL.Path); match == nil {
-		http.Error(response, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		http.Error(responsewriter, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	} else {
 		conn := self.Pool.Get().(*Conn)
 		defer self.Pool.Put(conn)
-		conn.init(response, request)
+		conn.init(responsewriter, request)
 
 		handle := reflect.New(entry)
 		handle.Interface().(Handler).Init(conn, match)
