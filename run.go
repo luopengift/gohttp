@@ -1,13 +1,13 @@
 package gohttp
 
 import (
+	"fmt"
 	"net/http"
 	"time"
-    "fmt"
 )
 
 func HttpRun(config *Config) {
-    fmt.Println("HttpServer Start",config.Addr)
+	fmt.Println("HttpServer Start", config.Addr)
 	server := &http.Server{
 		Addr:           config.Addr,
 		Handler:        NewHttpHandler(),
@@ -15,15 +15,13 @@ func HttpRun(config *Config) {
 		WriteTimeout:   time.Duration(config.WriteTimeout) * time.Second,
 		MaxHeaderBytes: config.MaxHeaderBytes,
 	}
-    if err := server.ListenAndServe();err != nil {
-        fmt.Println(err)
-    }
+	if err := server.ListenAndServe(); err != nil {
+		fmt.Println(err)
+	}
 }
 
-
-
 func HttpsRun(config *Config) {
-    fmt.Println("HttpsServer Start",config.Addr)
+	fmt.Println("HttpsServer Start", config.Addr)
 	server := &http.Server{
 		Addr:           config.Addr,
 		Handler:        NewHttpHandler(),
@@ -31,7 +29,7 @@ func HttpsRun(config *Config) {
 		WriteTimeout:   time.Duration(config.WriteTimeout) * time.Second,
 		MaxHeaderBytes: config.MaxHeaderBytes,
 	}
-	if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile);err != nil {
-        fmt.Println(err)
-    }
+	if err := server.ListenAndServeTLS(config.CertFile, config.KeyFile); err != nil {
+		fmt.Println(err)
+	}
 }

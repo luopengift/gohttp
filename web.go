@@ -23,9 +23,13 @@ func (self *HttpHandler) Header() http.Header {
 	return self.Request.Header
 }
 
-func (self *HttpHandler) GetHeader(name string) string {
+func (self *HttpHandler) GetHeader(name string, null ...string) string {
 	if value, ok := self.Request.Header[name]; ok {
 		return value[0]
+	}
+	//默认值
+	if len(null) == 1 {
+		return null[0]
 	}
 	return ""
 }
@@ -34,10 +38,17 @@ func (self *HttpHandler) GetMatchArgs() map[string]string {
 	return self.matchArgs
 }
 
-func (self *HttpHandler) GetMatchArg(name string) string {
+//获取通过正则表达式匹配到的uri中的参数
+//name:参数名, null:默认值
+func (self *HttpHandler) GetMatchArg(name string, null ...string) string {
 	if value, ok := self.matchArgs[name]; ok {
 		return value
 	}
+	//默认值
+	if len(null) == 1 {
+		return null[0]
+	}
+
 	return ""
 }
 
@@ -45,9 +56,13 @@ func (self *HttpHandler) GetQueryArgs() map[string][]string {
 	return self.queryArgs
 }
 
-func (self *HttpHandler) GetQueryArg(name string) string {
+func (self *HttpHandler) GetQueryArg(name string, null ...string) string {
 	if value, ok := self.queryArgs[name]; ok {
 		return value[0]
+	}
+	//默认值
+	if len(null) == 1 {
+		return null[0]
 	}
 	return ""
 }
@@ -57,8 +72,12 @@ func (self *HttpHandler) GetBodyArgs() []byte {
 	return self.bodyArgs
 }
 
-func (self *HttpHandler) GetBodyArg(name string) {
-
+func (self *HttpHandler) GetBodyArg(name string, null ...string) string {
+	//默认值
+	if len(null) == 1 {
+		return null[0]
+	}
+	return ""
 }
 
 //Content-Type:"application/x-www-form-urlencoded"
@@ -128,7 +147,7 @@ func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *
 		handle.MethodByName("Finish").Call(nil)
 	}
 END:
-	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, request.RemoteAddr,"->",request.Host, time.Since(stime))
+	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
 }
 
 func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
@@ -149,6 +168,11 @@ func (self *HttpHandler) Redirect(url string, code int) {
 }
 
 func (self *HttpHandler) Render(tpl string, data interface{}) error {
+	return self.render(tpl, data, http.StatusOK)
+}
+
+func (self *HttpHandler) render(tpl string, data interface{}, code int) error {
+	self.ResponseWriter.WriteHeader(code)
 	t, err := template.ParseFiles(tpl)
 	if err != nil {
 		return err

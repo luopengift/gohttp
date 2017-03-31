@@ -6,13 +6,13 @@ import (
 
 type Connection interface {
 	request() *http.Request
-    response() *http.Response
+	response() *http.Response
 	responseWriter() http.ResponseWriter
 }
 
 type Conn struct {
 	*http.Request
-    *http.Response
+	*http.Response
 	http.ResponseWriter
 }
 
@@ -31,5 +31,5 @@ func (self *Conn) request() *http.Request {
 }
 
 func (self *Conn) response() *http.Response {
-    return self.Response
+	return self.Response
 }
