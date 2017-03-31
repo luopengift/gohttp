@@ -12,7 +12,7 @@ func (self *Test) GET() {
 }
 
 func (self *Test) POST() {
-	self.Output([]byte(self.Request().PostFormValue("id")))
+	self.Output([]byte(self.Request.PostFormValue("id")))
 	self.Output([]byte("hello"))
 }
 

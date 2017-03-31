@@ -20,11 +20,11 @@ type RequestHandler struct {
 }
 
 func (self *HttpHandler) Header() http.Header {
-	return self.Request().Header
+	return self.Request.Header
 }
 
 func (self *HttpHandler) GetHeader(name string) string {
-	if value, ok := self.Request().Header[name]; ok {
+	if value, ok := self.Request.Header[name]; ok {
 		return value[0]
 	}
 	return ""
@@ -89,14 +89,14 @@ func NewHttpHandler() *HttpHandler {
 func (self *HttpHandler) Init(conn *Conn, kv map[string]string) {
 	self.Conn = conn
 	self.matchArgs = kv //获取通过正则匹配出来的url参数
-	self.Request().ParseForm()
-	self.queryArgs = self.Request().Form //获取query参数
+	self.Request.ParseForm()
+	self.queryArgs = self.Request.Form //获取query参数
 
-	self.bodyArgs, _ = ioutil.ReadAll(self.Request().Body) //获取body参数
+	self.bodyArgs, _ = ioutil.ReadAll(self.Request.Body) //获取body参数
 }
 
 func (self *HttpHandler) Output(o []byte) {
-	self.Response().Write(o)
+	self.ResponseWriter.Write(o)
 }
 
 func (self *HttpHandler) ServeHTTP(response http.ResponseWriter, request *http.Request) {
@@ -145,7 +145,7 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 }
 
 func (self *HttpHandler) Redirect(url string, code int) {
-	http.Redirect(self.Response(), self.Request(), url, code)
+	http.Redirect(self.ResponseWriter, self.Request, url, code)
 }
 
 func (self *HttpHandler) Render(tpl string, data interface{}) error {
@@ -153,9 +153,9 @@ func (self *HttpHandler) Render(tpl string, data interface{}) error {
 	if err != nil {
 		return err
 	}
-	return t.Execute(self.Response(), data)
+	return t.Execute(self.ResponseWriter, data)
 }
 
 func (self *HttpHandler) RemoteAddr() string {
-	return self.Request().RemoteAddr
+	return self.Request.RemoteAddr
 }

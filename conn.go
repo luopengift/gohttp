@@ -5,25 +5,31 @@ import (
 )
 
 type Connection interface {
-	Request() *http.Request
-	Response() http.ResponseWriter
+	request() *http.Request
+    response() *http.Response
+	responseWriter() http.ResponseWriter
 }
 
 type Conn struct {
-	request  *http.Request
-	response http.ResponseWriter
+	*http.Request
+    *http.Response
+	http.ResponseWriter
 }
 
-func (self *Conn) init(response http.ResponseWriter, request *http.Request) *Conn {
-	self.response = response
-	self.request = request
+func (self *Conn) init(responsewriter http.ResponseWriter, request *http.Request) *Conn {
+	self.ResponseWriter = responsewriter
+	self.Request = request
 	return self
 }
 
-func (self *Conn) Response() http.ResponseWriter {
-	return self.response
+func (self *Conn) responseWriter() http.ResponseWriter {
+	return self.ResponseWriter
 }
 
-func (self *Conn) Request() *http.Request {
-	return self.request
+func (self *Conn) request() *http.Request {
+	return self.Request
+}
+
+func (self *Conn) response() *http.Response {
+    return self.Response
 }
