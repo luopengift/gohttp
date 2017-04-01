@@ -13,6 +13,7 @@ import (
 )
 
 type RequestHandler struct {
+	*Conn
 	matchArgs map[string]string
 	queryArgs map[string][]string
 	bodyArgs  []byte
@@ -94,7 +95,6 @@ type Handler interface {
 type HttpHandler struct {
 	sync.Pool
 	RequestHandler
-	*Conn
 }
 
 func NewHttpHandler() *HttpHandler {
