@@ -2,7 +2,6 @@ package gohttp
 
 import (
 	"fmt"
-	"html/template"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
@@ -156,20 +155,8 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 	return nil, nil
 }
 
-func (self *RequestHandler) Redirect(url string, code int) {
-	http.Redirect(self.ResponseWriter, self.Request, url, code)
-}
 
 func (self *HttpHandler) Render(tpl string, data interface{}) error {
-	return self.render(tpl, data, http.StatusOK)
-}
-
-func (self *HttpHandler) render(tpl string, data interface{}, code int) error {
-	self.ResponseWriter.WriteHeader(code)
-	t, err := template.ParseFiles(tpl)
-	if err != nil {
-		return err
-	}
-	return t.Execute(self.ResponseWriter, data)
+	return render(self.ResponseWriter, tpl, data, http.StatusOK)
 }
 

@@ -12,6 +12,10 @@ type RequestHandler struct {
     finished  bool
 }
 
+func (self *RequestHandler) Redirect(url string, code int) {
+	http.Redirect(self.ResponseWriter, self.Request, url, code)
+}
+
 func (self *RequestHandler) RemoteAddr() string {
 	return self.Request.RemoteAddr
 }
