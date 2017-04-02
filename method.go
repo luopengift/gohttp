@@ -4,6 +4,18 @@ import (
 	"net/http"
 )
 
+type RequestHandler struct {
+    *Conn
+    matchArgs map[string]string
+    queryArgs map[string][]string
+    bodyArgs  []byte
+    finished  bool
+}
+
+func (self *RequestHandler) RemoteAddr() string {
+	return self.Request.RemoteAddr
+}
+
 func (self *RequestHandler) Prepare() {}
 func (self *RequestHandler) Finish()  {}
 func (self *RequestHandler) GET() {

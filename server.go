@@ -12,13 +12,6 @@ import (
 	"time"
 )
 
-type RequestHandler struct {
-	*Conn
-	matchArgs map[string]string
-	queryArgs map[string][]string
-	bodyArgs  []byte
-	finished  bool
-}
 
 func (self *HttpHandler) Header() http.Header {
 	return self.Request.Header
@@ -163,7 +156,7 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 	return nil, nil
 }
 
-func (self *HttpHandler) Redirect(url string, code int) {
+func (self *RequestHandler) Redirect(url string, code int) {
 	http.Redirect(self.ResponseWriter, self.Request, url, code)
 }
 
@@ -180,6 +173,3 @@ func (self *HttpHandler) render(tpl string, data interface{}, code int) error {
 	return t.Execute(self.ResponseWriter, data)
 }
 
-func (self *HttpHandler) RemoteAddr() string {
-	return self.Request.RemoteAddr
-}

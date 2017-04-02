@@ -16,6 +16,12 @@ type Conn struct {
 	http.ResponseWriter
 }
 
+
+func NewConn(responsewriter http.ResponseWriter, request *http.Request) *Conn {
+    return &Conn{request,nil,responsewriter}
+}
+
+
 func (self *Conn) init(responsewriter http.ResponseWriter, request *http.Request) *Conn {
 	self.ResponseWriter = responsewriter
 	self.Request = request

@@ -7,7 +7,7 @@ type Test struct {
 }
 
 func (self *Test) GET() {
-	//	self.Redirect("http://www.baidu.com", 301)
+	self.Redirect("http://www.baidu.com", 301)
 	self.Render("template/index.tpl", nil)
 }
 
