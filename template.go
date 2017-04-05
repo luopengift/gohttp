@@ -5,11 +5,14 @@ import (
     "html/template"
 )
 
-func render(responsewriter http.ResponseWriter, tpl string, data interface{}, code int) error {
+func renderFile(responsewriter http.ResponseWriter, tpl string, data interface{}, code int) error {
     responsewriter.WriteHeader(code)
-    t, err := template.ParseFiles(tpl)
-    if err != nil {
-        return err
-    }
+    t := template.Must(template.ParseFiles(tpl))
+    return t.Execute(responsewriter, data)
+}
+
+func renderString(responsewriter http.ResponseWriter,name, str string, data interface{}, code int) error {
+    responsewriter.WriteHeader(code)
+    t := template.Must(template.New(name).Parse(str))
     return t.Execute(responsewriter, data)
 }

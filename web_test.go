@@ -10,7 +10,7 @@ import (
 func Test_web(t *testing.T) {
 	fmt.Println(os.Getwd())
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	fmt.Println(Router)
+	fmt.Println(RouterMap)
 	go HttpsRun(&Config{
 		Addr:     ":443",
 		CertFile: "./server.cert",

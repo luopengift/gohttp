@@ -143,7 +143,7 @@ END:
 }
 
 func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
-	for pattern, handle := range Router {
+	for pattern, handle := range RouterMap {
 		if match := pattern.FindStringSubmatch(url); match != nil {
 			var kv = map[string]string{}
 			for key, value := range pattern.SubexpNames() {
@@ -157,6 +157,10 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 
 
 func (self *HttpHandler) Render(tpl string, data interface{}) error {
-	return render(self.ResponseWriter, tpl, data, http.StatusOK)
+	return renderFile(self.ResponseWriter, tpl, data, http.StatusOK)
 }
 
+func (self *HttpHandler) ReanderString(name,tpl string,data interface{}) error {
+	return renderString(self.ResponseWriter, name, tpl, data, http.StatusOK)
+    
+}

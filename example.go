@@ -1,6 +1,8 @@
 package gohttp
 
-import ()
+import (
+    "fmt"
+)
 
 type Test struct {
 	HttpHandler
@@ -16,6 +18,17 @@ func (self *Test) POST() {
 	self.Output([]byte("hello"))
 }
 
+type RouterHandler struct {
+    HttpHandler
+}
+
+func (self *RouterHandler) GET() {
+    for k,v := range RouterMap {
+        self.Output([]byte(fmt.Sprintf("%v:%v\n",k,v)))
+    }
+}
+
 func init() {
+	RouterRegister("^/routers$",&RouterHandler{})
 	RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
 }
