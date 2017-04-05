@@ -27,26 +27,26 @@ func (self *RequestHandler) GET() {
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) HEAD() {
-	//If defines GET method,must rewrite this function.
+	//If defines HEAD method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) POST() {
-	//If defines GET method,must rewrite this function.
+	//If defines POST method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) PUT() {
-	//If defines GET method,must rewrite this function.
+	//If defines PUT method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) PATCH() {
-	//If defines GET method,must rewrite this function.
+	//If defines PATCH method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) DELETE() {
-	//If defines GET method,must rewrite this function.
+	//If defines DELETE method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }
 func (self *RequestHandler) OPTIONS() {
-	//If defines GET method,must rewrite this function.
+	//If defines OPTIONS method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 }

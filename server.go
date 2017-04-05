@@ -12,6 +12,17 @@ import (
 )
 
 
+type Handler interface {
+	http.Handler
+	Connection
+	Init(*Conn, map[string]string)
+}
+
+type HttpHandler struct {
+	sync.Pool
+	RequestHandler
+}
+
 func (self *HttpHandler) Header() http.Header {
 	return self.Request.Header
 }
@@ -78,16 +89,6 @@ func (self *HttpHandler) GetBodyArg(name string, null ...string) string {
 func (self *HttpHandler) GetFormArgs() {}
 func (self *HttpHandler) GetFormArg()  {}
 
-type Handler interface {
-	http.Handler
-	Connection
-	Init(*Conn, map[string]string)
-}
-
-type HttpHandler struct {
-	sync.Pool
-	RequestHandler
-}
 
 func NewHttpHandler() *HttpHandler {
 	httphandler := &HttpHandler{}
@@ -142,6 +143,7 @@ END:
 	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
 }
 
+
 func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 	for pattern, handle := range RouterMap {
 		if match := pattern.FindStringSubmatch(url); match != nil {
@@ -160,7 +162,10 @@ func (self *HttpHandler) Render(tpl string, data interface{}) error {
 	return renderFile(self.ResponseWriter, tpl, data, http.StatusOK)
 }
 
-func (self *HttpHandler) ReanderString(name,tpl string,data interface{}) error {
-	return renderString(self.ResponseWriter, name, tpl, data, http.StatusOK)
+
+func (self *HttpHandler) ReanderString(name string,data interface{}) error {
+	return renderString(self.ResponseWriter, name, data, http.StatusOK)
     
 }
+
+
