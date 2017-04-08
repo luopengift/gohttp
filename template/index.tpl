@@ -18,7 +18,7 @@
     <![endif]-->
   </head>
   <body>
-    <h1>你好，世界！</h1>
+    <h1>你好，世界！{{.content}}</h1>
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>

@@ -9,8 +9,8 @@ type Test struct {
 }
 
 func (self *Test) GET() {
-	self.Redirect("http://www.baidu.com", 301)
-	self.Render("template/index.tpl", nil)
+	//self.Redirect("http://www.baidu.com", 301)
+	self.Render("template/index.tpl", map[string]string{"content":"This is a test page"})
 }
 
 func (self *Test) POST() {
@@ -31,4 +31,5 @@ func (self *RouterHandler) GET() {
 func init() {
 	RouterRegister("^/routers$",&RouterHandler{})
 	RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
+	RouterRegister("^/test", &Test{})
 }

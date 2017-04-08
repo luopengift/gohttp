@@ -112,23 +112,23 @@ func (self *HttpHandler) Output(o []byte) {
 }
 
 func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
+    //fmt.Println("SERVEHTTP",1234567890)
 	stime := time.Now()
-
-	if request.URL.Path == "/robots.txt" || request.URL.Path == "/favicon.ico" {
-		http.Error(responsewriter, http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		goto END
-	}
+    status := 200
 
 	if strings.HasPrefix(request.URL.Path, "/static") {
 		StaticPath := "."
 		file := filepath.Join(StaticPath, request.URL.Path)
-		http.ServeFile(responsewriter, request, file)
+        http.ServeFile(responsewriter, request, file)
 		goto END
 	}
 
 	if match, entry := self.findHandle(request.URL.Path); match == nil {
+        status = http.StatusNotFound
 		http.Error(responsewriter, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		goto END
 	} else {
+        fmt.Println("match",match)
 		conn := self.Pool.Get().(*Conn)
 		defer self.Pool.Put(conn)
 		conn.init(responsewriter, request)
@@ -138,9 +138,10 @@ func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *
 		handle.MethodByName("Prepare").Call(nil)
 		handle.MethodByName(request.Method).Call(nil)
 		handle.MethodByName("Finish").Call(nil)
+		goto END
 	}
 END:
-	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), 200, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
+	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), status, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
 }
 
 
@@ -158,8 +159,11 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 }
 
 
-func (self *HttpHandler) Render(tpl string, data interface{}) error {
-	return renderFile(self.ResponseWriter, tpl, data, http.StatusOK)
+func (self *HttpHandler) Render(tpl string, data ...interface{}) error {
+	if len(data) == 1 {
+        return renderFile(self.ResponseWriter, tpl, data[0], http.StatusOK)
+    }
+    return renderFile(self.ResponseWriter, tpl, nil, http.StatusOK)
 }
 
 

@@ -29,7 +29,7 @@ func (self *Test) POST() {
 func main() {
     //绑定路由
     gohttp.RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
-    gohttp.Start(&gohttp.Config{
+    gohttp.HttpRun(&gohttp.Config{
         Addr:     ":9999",
         CertFile: "./server.cert",
         KeyFile:  "./server.key",
