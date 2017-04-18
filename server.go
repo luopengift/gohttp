@@ -107,8 +107,10 @@ func (self *HttpHandler) Init(conn *Conn, kv map[string]string) {
 	self.bodyArgs, _ = ioutil.ReadAll(self.Request.Body) //获取body参数
 }
 
-func (self *HttpHandler) Output(o []byte) {
-	self.ResponseWriter.Write(o)
+func (self *HttpHandler) Output(o interface{}) error {
+    out,err := Bytes(o)
+    self.ResponseWriter.Write(out)
+    return err
 }
 
 func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {

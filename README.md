@@ -4,7 +4,7 @@ simple http framework for golang
 ### 模拟tornado
 
 #### 使用说明
-
+1. HTTP server
 ```
 package main
 
@@ -36,7 +36,11 @@ func main() {
     })
 }
 ```
-
+2. HTTP client
+```
+resp,err := gohttp.NewClient().URL(http://www.google.com).Header("Content-Type","application/json;charset=utf-8").Get()
+fmt.Println(resp.String())
+```
 
 
 
