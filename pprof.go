@@ -2,19 +2,14 @@ package gohttp
 
 import ()
 
-
 type pprofHandler struct {
-    HttpHandler
+	HttpHandler
 }
 
 func (self *pprofHandler) GET() {
 
 }
 
-
-
-
-
 func init() {
-    RouterRegister("^/pprof$",&pprofHandler{})
+	RouterRegister("^/pprof$", &pprofHandler{})
 }

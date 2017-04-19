@@ -18,11 +18,11 @@ type Test struct {
 }
 
 func (self *Test) GET() {
-    self.Output([]byte("world"))
+    self.Output("world")
 }
 
 func (self *Test) POST() {
-    self.Output([]byte("hello"))
+    self.Output("hello")
 }
 
 //启动服务

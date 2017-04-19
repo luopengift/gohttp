@@ -1,7 +1,7 @@
 package gohttp
 
 import (
-    "fmt"
+	"fmt"
 )
 
 type Test struct {
@@ -10,26 +10,26 @@ type Test struct {
 
 func (self *Test) GET() {
 	//self.Redirect("http://www.baidu.com", 301)
-	self.Render("template/index.tpl", map[string]string{"content":"This is a test page"})
+	self.Render("template/index.tpl", map[string]string{"content": "This is a test page"})
 }
 
 func (self *Test) POST() {
 	fmt.Println(self.Header())
-    self.Output(self.GetBodyArgs())
+	self.Output(self.GetBodyArgs())
 }
 
 type RouterHandler struct {
-    HttpHandler
+	HttpHandler
 }
 
 func (self *RouterHandler) GET() {
-    for k,v := range RouterMap {
-        self.Output([]byte(fmt.Sprintf("%v:%v\n",k,v)))
-    }
+	for k, v := range RouterMap {
+		self.Output([]byte(fmt.Sprintf("%v:%v\n", k, v)))
+	}
 }
 
 func init() {
-	RouterRegister("^/routers$",&RouterHandler{})
+	RouterRegister("^/routers$", &RouterHandler{})
 	RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
 	RouterRegister("^/test", &Test{})
 }

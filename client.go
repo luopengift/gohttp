@@ -3,7 +3,6 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -51,30 +50,6 @@ func (self *Response) String() string {
 func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
 	req, err := http.NewRequest(method, urlStr, body)
 	return &Request{req}, err
-}
-
-func Bytes(v interface{}) ([]byte, error) {
-	switch v.(type) {
-	case string:
-		return []byte(v.(string)), nil
-	case []byte:
-		return v.([]byte), nil
-	default:
-		return json.Marshal(v)
-	}
-}
-
-func String(v interface{}) (string, error) {
-	switch v.(type) {
-	case string:
-		return v.(string), nil
-	case []byte:
-		return string(v.([]byte)), nil
-	default:
-		b, err := json.Marshal(v)
-		return string(b), err
-	}
-
 }
 
 type Client struct {
@@ -157,13 +132,13 @@ func (self *Client) newURL() (*url.URL, error) {
 	if err != nil {
 		return u, err
 	}
-    if self.path != "" {
-	    u.Path = self.path
-    }
-    if self.path != "" {
-	    u.RawQuery = self.query
+	if self.path != "" {
+		u.Path = self.path
 	}
-    return u, err
+	if self.path != "" {
+		u.RawQuery = self.query
+	}
+	return u, err
 }
 
 func (self *Client) newRequest() (*http.Request, error) {
@@ -220,6 +195,3 @@ func (self *Client) Get() (*Response, error)  { return self.doReq("GET") }
 func (self *Client) Post() (*Response, error) { return self.doReq("POST") }
 func (self *Client) Head() (*Response, error) { return self.doReq("HEAD") }
 func (self *Client) Put() (*Response, error)  { return self.doReq("PUT") }
-
-
-
