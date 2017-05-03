@@ -18,6 +18,7 @@ type Handler interface {
 }
 
 type HttpHandler struct {
+    status int64
 	sync.Pool
 	RequestHandler
 }
@@ -97,7 +98,8 @@ func NewHttpHandler() *HttpHandler {
 }
 
 func (self *HttpHandler) Init(conn *Conn, kv map[string]string) {
-	self.Conn = conn
+	self.status = http.StatusOK
+    self.Conn = conn
 	self.matchArgs = kv //获取通过正则匹配出来的url参数
 	self.Request.ParseForm()
 	self.queryArgs = self.Request.Form //获取query参数
@@ -112,23 +114,20 @@ func (self *HttpHandler) Output(o interface{}) error {
 }
 
 func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
-	//fmt.Println("SERVEHTTP",1234567890)
 	stime := time.Now()
-	status := 200
-
-	if strings.HasPrefix(request.URL.Path, "/static") {
+	self.status = http.StatusOK
+	if strings.HasPrefix(request.URL.Path, "/static") || hasSuffixs(request.URL.Path,".ico",".jpg",".jpeg",".png",".bmp",".gif",".js",".css",".swf") {
 		StaticPath := "."
 		file := filepath.Join(StaticPath, request.URL.Path)
 		http.ServeFile(responsewriter, request, file)
 		goto END
 	}
 
-	if match, entry := self.findHandle(request.URL.Path); match == nil {
-		status = http.StatusNotFound
+	if match, entry := findHandle(request.URL.Path); match == nil {
+		self.status = http.StatusNotFound
 		http.Error(responsewriter, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		goto END
 	} else {
-		fmt.Println("match", match)
 		conn := self.Pool.Get().(*Conn)
 		defer self.Pool.Put(conn)
 		conn.init(responsewriter, request)
@@ -136,15 +135,16 @@ func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *
 		handle := reflect.New(entry)
 		handle.Interface().(Handler).Init(conn, match)
 		handle.MethodByName("Prepare").Call(nil)
-		handle.MethodByName(request.Method).Call(nil)
-		handle.MethodByName("Finish").Call(nil)
-		goto END
+        handle.MethodByName(request.Method).Call(nil)
+        handle.MethodByName("Finish").Call(nil)
+        self.status = reflect.Indirect(handle).FieldByName("status").Int()
+        goto END
 	}
 END:
-	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), status, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
+	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), self.status, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
 }
 
-func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
+func findHandle(url string) (map[string]string, muxEntry) {
 	for pattern, handle := range RouterMap {
 		if match := pattern.FindStringSubmatch(url); match != nil {
 			var kv = map[string]string{}
@@ -157,14 +157,16 @@ func (self *HttpHandler) findHandle(url string) (map[string]string, muxEntry) {
 	return nil, nil
 }
 
-func (self *HttpHandler) Render(tpl string, data ...interface{}) error {
-	if len(data) == 1 {
-		return renderFile(self.ResponseWriter, tpl, data[0], http.StatusOK)
-	}
-	return renderFile(self.ResponseWriter, tpl, nil, http.StatusOK)
+func (self *HttpHandler) Render(tpl string, data ...interface{}) (err error) {
+    if len(data) == 1 {
+		self.status,err = renderFile(self.ResponseWriter, tpl, data[0])
+	    return
+    }
+	self.status,err = renderFile(self.ResponseWriter, tpl, nil)
+    return
 }
 
 func (self *HttpHandler) ReanderString(name string, data interface{}) error {
-	return renderString(self.ResponseWriter, name, data, http.StatusOK)
+	return renderString(self.ResponseWriter, name, data)
 
 }

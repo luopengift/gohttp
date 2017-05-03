@@ -70,4 +70,8 @@ const (
 	StatusNotExtended                   = http.StatusNotExtended                   // 510  RFC 2774, 7
 	StatusNetworkAuthenticationRequired = http.StatusNetworkAuthenticationRequired // 511 RFC 6585, 6
 
+    StatusPrepareError  = 600 //define by me
+
+
+
 )

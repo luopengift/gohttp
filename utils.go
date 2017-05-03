@@ -2,6 +2,7 @@ package gohttp
 
 import (
 	"encoding/json"
+    "strings"
 )
 
 func Bytes(v interface{}) ([]byte, error) {
@@ -27,3 +28,13 @@ func String(v interface{}) (string, error) {
 	}
 
 }
+
+func hasSuffixs(s string, suffixs ...string) bool {
+    for _,suffix := range suffixs {
+        if ok := strings.HasSuffix(s, suffix);ok {
+            return true
+        }
+    }
+    return false
+}
+
