@@ -65,7 +65,7 @@ type Client struct {
 	timeout    int
 	retries    int
 	verifySsl  bool //true:强制使用https,false:不校验https证书
-	keepalived bool
+	keepAlived bool
 	transport  http.Transport
 }
 
@@ -75,7 +75,7 @@ func NewClient() *Client {
 		cookies:    make(map[string]string),
 		headers:    make(map[string]string),
 		verifySsl:  false,
-		keepalived: true,
+		keepAlived: true,
 	}
 }
 
@@ -107,7 +107,7 @@ func (self *Client) setClient() (*http.Client, error) {
 		}
 		self.transport.Proxy = http.ProxyURL(proxy)
 	}
-	self.transport.DisableKeepAlives = !self.KeepAlived
+	self.transport.DisableKeepAlives = !self.keepAlived
 	self.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !self.verifySsl}
 	client := &http.Client{Transport: &self.transport}
 	client.Timeout = time.Duration(self.timeout) * time.Second
@@ -127,7 +127,7 @@ func (self *Client) Reset() *Client {
 	self.timeout = 0
 	self.retries = 0
 	self.verifySsl = false
-	self.keepalived = true
+	self.keepAlived = true
 	self.transport = http.Transport{}
 	return self
 }
@@ -149,8 +149,8 @@ func (self *Client) doReq(method string) (*Response, error) {
 }
 
 // 长连接,Default is true
-func (self *Client) Keepalived(used bool) *Client {
-	self.keepalived = used
+func (self *Client) KeepAlived(used bool) *Client {
+	self.keepAlived = used
 	return self
 }
 
