@@ -9,7 +9,6 @@ type RequestHandler struct {
 	matchArgs map[string]string
 	queryArgs map[string][]string
 	bodyArgs  []byte
-	finished  bool
 }
 
 func (self *RequestHandler) Redirect(url string, code int) {
@@ -20,17 +19,6 @@ func (self *RequestHandler) RemoteAddr() string {
 	return self.Request.RemoteAddr
 }
 
-func (self *RequestHandler) Finished() bool {
-    self.finished = true
-    return self.finished
-}
-
-func (self *RequestHandler) isFinished() bool {
-    return self.finished
-}
-
-func (self *RequestHandler) Prepare() {}
-func (self *RequestHandler) Finish()  {}
 func (self *RequestHandler) GET() {
 	//If defines GET method,must rewrite this function.
 	http.Error(self.ResponseWriter, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)

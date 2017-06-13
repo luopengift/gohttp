@@ -18,7 +18,7 @@ type Handler interface {
 }
 
 type HttpHandler struct {
-    status int64
+	status int64
 	sync.Pool
 	RequestHandler
 }
@@ -99,7 +99,7 @@ func NewHttpHandler() *HttpHandler {
 
 func (self *HttpHandler) Init(conn *Conn, kv map[string]string) {
 	self.status = http.StatusOK
-    self.Conn = conn
+	self.Conn = conn
 	self.matchArgs = kv //获取通过正则匹配出来的url参数
 	self.Request.ParseForm()
 	self.queryArgs = self.Request.Form //获取query参数
@@ -116,7 +116,7 @@ func (self *HttpHandler) Output(o interface{}) error {
 func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
 	self.status = http.StatusOK
-	if strings.HasPrefix(request.URL.Path, "/static") || hasSuffixs(request.URL.Path,".ico",".jpg",".jpeg",".png",".bmp",".gif",".js",".css",".swf") {
+	if strings.HasPrefix(request.URL.Path, "/static") || hasSuffixs(request.URL.Path, ".ico", ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".js", ".css", ".swf") {
 		StaticPath := "."
 		file := filepath.Join(StaticPath, request.URL.Path)
 		http.ServeFile(responsewriter, request, file)
@@ -134,11 +134,9 @@ func (self *HttpHandler) ServeHTTP(responsewriter http.ResponseWriter, request *
 
 		handle := reflect.New(entry)
 		handle.Interface().(Handler).Init(conn, match)
-		handle.MethodByName("Prepare").Call(nil)
-        handle.MethodByName(request.Method).Call(nil)
-        handle.MethodByName("Finish").Call(nil)
-        self.status = reflect.Indirect(handle).FieldByName("status").Int()
-        goto END
+		handle.MethodByName(request.Method).Call(nil)
+		self.status = reflect.Indirect(handle).FieldByName("status").Int()
+		goto END
 	}
 END:
 	fmt.Println(time.Now().Format("2006-01-02 15:04:05.000"), self.status, request.Method, request.URL, request.RemoteAddr, "->", request.Host, time.Since(stime))
@@ -158,12 +156,12 @@ func findHandle(url string) (map[string]string, muxEntry) {
 }
 
 func (self *HttpHandler) Render(tpl string, data ...interface{}) (err error) {
-    if len(data) == 1 {
-		self.status,err = renderFile(self.ResponseWriter, tpl, data[0])
-	    return
-    }
-	self.status,err = renderFile(self.ResponseWriter, tpl, nil)
-    return
+	if len(data) == 1 {
+		self.status, err = renderFile(self.ResponseWriter, tpl, data[0])
+		return
+	}
+	self.status, err = renderFile(self.ResponseWriter, tpl, nil)
+	return
 }
 
 func (self *HttpHandler) ReanderString(name string, data interface{}) error {

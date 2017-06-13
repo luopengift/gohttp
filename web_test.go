@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func Test_web(t *testing.T) {
 	fmt.Println(RouterMap)
 	/*go HttpsRun(&Config{
@@ -13,10 +12,11 @@ func Test_web(t *testing.T) {
 		CertFile: "./server.cert",
 		KeyFile:  "./server.key",
 	})
-    */
+	*/
 	HttpRun(&Config{Addr: ":18080"})
 	//select {}
 }
+
 /*
 func Test_client(t *testing.T) {
 	fmt.Println("test")
