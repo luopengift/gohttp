@@ -79,16 +79,30 @@ func NewClient() *Client {
 	}
 }
 
-func (self *Client) newRequest() (*http.Request, error) {
-	u, err := self.newURL()
-	if err != nil {
-		return nil, err
+//构造request body [interface{} -> io.Reader]
+func parseBody(v interface{}) (io.Reader, error) {
+	if v == nil {
+		return nil, nil
 	}
 	bts, err := Bytes(self.body)
 	if err != nil {
 		return nil, err
 	}
 	body := bytes.NewBuffer(bts)
+	return body, nil
+}
+
+func (self *Client) newRequest() (*http.Request, error) {
+	u, err := self.newURL()
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := parseBody(self.body)
+	if err != nil {
+		return nil, err
+	}
+
 	req, err := NewRequest(self.method, u.String(), body)
 	for k, v := range self.headers {
 		req.Header.Set(k, v)
