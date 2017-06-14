@@ -48,7 +48,7 @@ func (self *Response) String() string {
 }
 
 func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
-	req, err := http.NewRequest(method, urlStr, body)
+	req, err := http.NewRequest(method, url.QueryEscape(urlStr), body)
 	return &Request{req}, err
 }
 
@@ -229,7 +229,7 @@ func (self *Client) newURL() (*url.URL, error) {
 	if self.path != "" {
 		u.Path = self.path
 	}
-	if self.path != "" {
+	if self.query != "" {
 		u.RawQuery = self.query
 	}
 	return u, err
