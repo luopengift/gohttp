@@ -48,7 +48,7 @@ func (self *Response) String() string {
 }
 
 func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
-	req, err := http.NewRequest(method, url.QueryEscape(urlStr), body)
+	req, err := http.NewRequest(method, urlStr), body)
 	return &Request{req}, err
 }
 
@@ -182,6 +182,16 @@ func (self *Client) URL(urlstr string) *Client {
 func (self *Client) Path(path string) *Client {
 	self.path = path
 	return self
+}
+
+func (self *Client) Query(kv map[string]string) *Client {
+    query := []string{}
+    for k,v := range kv {
+        s := k + "=" + url.QueryEscape(v)
+        query = append(query,s)
+    }
+    self.query = strings.Join(query,"&")
+    return self
 }
 
 func (self *Client) Proxy(proxy string) *Client {
