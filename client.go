@@ -48,7 +48,7 @@ func (self *Response) String() string {
 }
 
 func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
-	req, err := http.NewRequest(method, urlStr), body)
+	req, err := http.NewRequest(method, urlStr, body)
 	return &Request{req}, err
 }
 
