@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
-    "strings"
 )
 
 type Request struct {
@@ -186,13 +186,13 @@ func (self *Client) Path(path string) *Client {
 }
 
 func (self *Client) Query(kv map[string]string) *Client {
-    query := []string{}
-    for k,v := range kv {
-        s := k + "=" + url.QueryEscape(v)
-        query = append(query,s)
-    }
-    self.query = strings.Join(query,"&")
-    return self
+	query := []string{}
+	for k, v := range kv {
+		s := k + "=" + url.QueryEscape(v)
+		query = append(query, s)
+	}
+	self.query = strings.Join(query, "&")
+	return self
 }
 
 func (self *Client) Proxy(proxy string) *Client {
