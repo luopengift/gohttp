@@ -4,32 +4,47 @@ import (
 	"fmt"
 )
 
-type Test struct {
+type TplHandler struct {
 	HttpHandler
 }
 
-func (self *Test) GET() {
+func (self *TplHandler) GET() {
 	//self.Redirect("http://www.baidu.com", 301)
 	self.Render("template/index.tpl", map[string]string{"content": "This is a test page"})
 }
 
-func (self *Test) POST() {
+func (self *TplHandler) POST() {
 	fmt.Println(self.Header())
 	self.Output(self.GetBodyArgs())
 }
 
-type RouterHandler struct {
+type ArgsHandler struct {
 	HttpHandler
 }
 
-func (self *RouterHandler) GET() {
-	for k, v := range RouterMap {
-		self.Output([]byte(fmt.Sprintf("%v:%v\n", k, v)))
+func (self *ArgsHandler) Run() {
+	match := self.GetMatchArgs()
+	query := self.GetQueryArgs()
+	body := self.GetBodyArgs()
+	result := map[string]interface{}{
+		"match":  match,
+		"query":  query,
+		"body":   string(body),
 	}
+	fmt.Println(result)
+	err := self.Output(result)
+    fmt.Println(err)
+}
+
+func (self *ArgsHandler) GET() {
+	self.Run()
+}
+
+func (self *ArgsHandler) POST() {
+	self.Run()
 }
 
 func init() {
-	RouterRegister("^/routers$", &RouterHandler{})
-	RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
-	RouterRegister("^/test", &Test{})
+	RouterRegister("^/args(/(?P<args>[0-9a-zA-Z]*))?$", &ArgsHandler{})
+	RouterRegister("^/tpl", &TplHandler{})
 }

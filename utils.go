@@ -7,8 +7,8 @@ import (
 )
 
 func BytesToJson(b []byte) (m map[string]interface{}, err error) {
-    err = json.Unmarshal(b, &m)
-    return
+	err = json.Unmarshal(b, &m)
+	return
 }
 
 // Bytes2String直接转换底层指针，两者指向的相同的内存，改一个另外一个也会变。
@@ -27,7 +27,7 @@ func StringToBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&h))
 }
 
-func Bytes(v interface{}) ([]byte, error) {
+func ToBytes(v interface{}) ([]byte, error) {
 	switch v.(type) {
 	case string:
 		return []byte(v.(string)), nil
@@ -38,7 +38,7 @@ func Bytes(v interface{}) ([]byte, error) {
 	}
 }
 
-func String(v interface{}) (string, error) {
+func ToString(v interface{}) (string, error) {
 	switch v.(type) {
 	case string:
 		return v.(string), nil

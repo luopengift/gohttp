@@ -6,9 +6,6 @@ import (
 
 type RequestHandler struct {
 	*Conn
-	matchArgs map[string]string
-	queryArgs map[string][]string
-	bodyArgs  []byte
 }
 
 func (self *RequestHandler) Redirect(url string, code int) {

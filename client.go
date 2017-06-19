@@ -85,7 +85,7 @@ func parseBody(v interface{}) (io.Reader, error) {
 	if v == nil {
 		return nil, nil
 	}
-	bts, err := Bytes(v)
+	bts, err := ToBytes(v)
 	if err != nil {
 		return nil, err
 	}

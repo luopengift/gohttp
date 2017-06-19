@@ -19,6 +19,10 @@ type Handler interface {
 
 type HttpHandler struct {
 	status int64
+	match  map[string]string
+	query  map[string][]string
+	body   []byte
+
 	sync.Pool
 	RequestHandler
 }
@@ -39,13 +43,13 @@ func (self *HttpHandler) GetHeader(name string, null ...string) string {
 }
 
 func (self *HttpHandler) GetMatchArgs() map[string]string {
-	return self.matchArgs
+	return self.match
 }
 
 //获取通过正则表达式匹配到的uri中的参数
 //name:参数名, null:默认值
 func (self *HttpHandler) GetMatchArg(name string, null ...string) string {
-	if value, ok := self.matchArgs[name]; ok {
+	if value, ok := self.match[name]; ok {
 		return value
 	}
 	//默认值
@@ -57,11 +61,11 @@ func (self *HttpHandler) GetMatchArg(name string, null ...string) string {
 }
 
 func (self *HttpHandler) GetQueryArgs() map[string][]string {
-	return self.queryArgs
+	return self.query
 }
 
 func (self *HttpHandler) GetQueryArg(name string, null ...string) string {
-	if value, ok := self.queryArgs[name]; ok {
+	if value, ok := self.query[name]; ok {
 		return value[0]
 	}
 	//默认值
@@ -73,16 +77,16 @@ func (self *HttpHandler) GetQueryArg(name string, null ...string) string {
 
 //Content-Type:text/plain;charset=UTF-8
 func (self *HttpHandler) GetBodyArgs() []byte {
-	return self.bodyArgs
+	return self.body
 }
 
 func (self *HttpHandler) GetBodyArg(name string, null ...string) interface{} {
-	if body,err := BytesToJson(self.bodyArgs); err!= nil {
-    }else{
-        return body[name]
-    }
+	if body, err := BytesToJson(self.body); err != nil {
+	} else {
+		return body[name]
+	}
 
-    //默认值
+	//默认值
 	if len(null) == 1 {
 		return null[0]
 	}
@@ -105,15 +109,15 @@ func NewHttpHandler() *HttpHandler {
 func (self *HttpHandler) Init(conn *Conn, kv map[string]string) {
 	self.status = http.StatusOK
 	self.Conn = conn
-	self.matchArgs = kv //获取通过正则匹配出来的url参数
+	self.match = kv //获取通过正则匹配出来的url参数
 	self.Request.ParseForm()
-	self.queryArgs = self.Request.Form //获取query参数
+	self.query = self.Request.Form //获取query参数
 
-	self.bodyArgs, _ = ioutil.ReadAll(self.Request.Body) //获取body参数
+	self.body, _ = ioutil.ReadAll(self.Request.Body) //获取body参数
 }
 
 func (self *HttpHandler) Output(o interface{}) error {
-	out, err := Bytes(o)
+	out, err := ToBytes(o)
 	self.ResponseWriter.Write(out)
 	return err
 }
@@ -154,6 +158,7 @@ func findHandle(url string) (map[string]string, muxEntry) {
 			for key, value := range pattern.SubexpNames() {
 				kv[value] = match[key]
 			}
+			delete(kv, "")
 			return kv, handle
 		}
 	}
