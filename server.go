@@ -76,7 +76,7 @@ func (self *HttpHandler) GetBodyArgs() []byte {
 	return self.bodyArgs
 }
 
-func (self *HttpHandler) GetBodyArg(name string, null ...string) string {
+func (self *HttpHandler) GetBodyArg(name string, null ...string) interface{} {
 	if body,err := BytesToJson(self.bodyArgs); err!= nil {
     }else{
         return body[name]
