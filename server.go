@@ -77,7 +77,12 @@ func (self *HttpHandler) GetBodyArgs() []byte {
 }
 
 func (self *HttpHandler) GetBodyArg(name string, null ...string) string {
-	//默认值
+	if body,err := BytesToJson(self.bodyArgs); err!= nil {
+    }else{
+        return body[name]
+    }
+
+    //默认值
 	if len(null) == 1 {
 		return null[0]
 	}
