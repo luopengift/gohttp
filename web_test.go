@@ -1,20 +1,17 @@
 package gohttp
 
 import (
-	"fmt"
+	//"fmt"
 	"testing"
 )
 
 func Test_web(t *testing.T) {
-	fmt.Println(RouterMap)
-	/*go HttpsRun(&Config{
-		Addr:     ":443",
-		CertFile: "./server.cert",
-		KeyFile:  "./server.key",
-	})
-	*/
-	HttpRun(&Config{Addr: ":18080"})
-	//select {}
+	app := Init()
+	app.Route("^/mirror(/(?P<args>[0-9a-zA-Z]*))?$", &MirrorHandler{})
+	app.Route("^/tpl", &TplHandler{})
+	//fmt.Println(app.String())
+	//fmt.Println(fmt.Sprintf("%#v", app.Server))
+	app.Run()
 }
 
 /*

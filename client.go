@@ -20,7 +20,7 @@ func (self *Request) SetHeader(k, v string) *Request {
 	return self
 }
 
-func (self *Request) Headers(kv map[string]string) *Request {
+func (self *Request) SetHeaders(kv map[string]string) *Request {
 	for k, v := range kv {
 		self.SetHeader(k, v)
 	}
