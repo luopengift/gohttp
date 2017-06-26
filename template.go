@@ -35,8 +35,7 @@ func InitTemplate() *Template {
 }
 
 func (t *Template) Add(name, tpl string) {
-    (*t)[name] = template.Must(template.New(name).Parse(tpl))
+	(*t)[name] = template.Must(template.New(name).Parse(tpl))
 }
 
 func (t *Template) renderFile(tpl string, data interface{}) {}
-

@@ -246,6 +246,11 @@ func (self *Client) newURL() (*url.URL, error) {
 	return u, err
 }
 
+func (self *Client) URLString() string {
+    url,_ := self.newURL().String()
+    return url
+}
+
 func (self *Client) Get() (*Response, error)  { return self.doReq("GET") }
 func (self *Client) Post() (*Response, error) { return self.doReq("POST") }
 func (self *Client) Head() (*Response, error) { return self.doReq("HEAD") }

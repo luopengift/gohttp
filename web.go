@@ -2,10 +2,10 @@ package gohttp
 
 import (
 	"github.com/luopengift/golibs/logger"
+	"html/template"
 	"io/ioutil"
 	"net/http"
 	"strings"
-    "html/template"
 )
 
 type Handler interface {
@@ -81,32 +81,34 @@ func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWrite
 }
 
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
-    return ctx.query
+	return ctx.query
 }
+
 // fetch query argument named by <name>, null is default value defined by user
 func (ctx *HttpHandler) GetQuery(name string, null string) string {
 	if value, ok := ctx.query[name]; !ok {
-        return null
+		return null
 	} else {
 		return value[0]
 	}
 }
 
 func (ctx *HttpHandler) GetMatchArgs() map[string]string {
-    return ctx.match
+	return ctx.match
 }
 
 // fetch match argument named by <name>, null is default value defined by user
 func (ctx *HttpHandler) GetMatch(name string, null string) string {
 	if value, ok := ctx.match[name]; !ok {
-        return null
+		return null
 	} else {
 		return value
 	}
 }
 
+// fetch body arguments
 func (ctx *HttpHandler) GetBodyArgs() []byte {
-    return ctx.body
+	return ctx.body
 }
 
 // fetch body argument named by <name>
@@ -174,7 +176,7 @@ func (ctx *HttpHandler) Redirect(url string, code int) {
 	ctx.isEnd = true
 }
 
-// response Http Error 
+// response Http Error
 func (ctx *HttpHandler) HTTPError(error string, code int) {
 	if ctx.isEnd {
 		logger.Error("HttpHandler is end!")
@@ -208,28 +210,28 @@ func (ctx *HttpHandler) output(response []byte) {
 	ctx.ResponseWriter.Write(response)
 }
 
-// render html data to client
-func(ctx *HttpHandler) Render(tpl string, data interface{}) {
+// If response is sent, do not sent again
+func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 	if ctx.isEnd {
 		logger.Error("HttpHandler is end!")
 		return
 	}
-    if template, ok := (*ctx.Template)[tpl]; !ok {
-        ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
-    }else{
-        ctx.render(template, data)
-        ctx.isEnd = true
-    }
+	if template, ok := (*ctx.Template)[tpl]; !ok {
+		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
+	} else {
+		ctx.render(template, data)
+		ctx.isEnd = true
+	}
 }
 
+// render html data to client
 func (ctx *HttpHandler) render(tpl *template.Template, data interface{}) {
-    for name, value := range ctx.Header {
-        ctx.ResponseWriter.Header().Set(name, value)
-    }
-    ctx.ResponseWriter.WriteHeader(ctx.status)
-    (*tpl).Execute(ctx.ResponseWriter, data)
+	for name, value := range ctx.Header {
+		ctx.ResponseWriter.Header().Set(name, value)
+	}
+	ctx.ResponseWriter.WriteHeader(ctx.status)
+	(*tpl).Execute(ctx.ResponseWriter, data)
 }
-
 
 // set response header into Header
 func (ctx *HttpHandler) SetHeader(name, value string) {

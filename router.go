@@ -45,9 +45,9 @@ func (self *RouterList) Find(path string) (muxEntry, map[string]string) {
 }
 
 func (self *RouterList) String() string {
-	str := ""
+	str := "\nRouter Map:\n"
 	for _, route := range *self {
-		str += route.path + "\n"
+		str += route.path + " => " + route.entry.String() + "\n"
 	}
 	return str
 }
