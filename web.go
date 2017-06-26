@@ -83,10 +83,10 @@ func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWrite
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
     return ctx.query
 }
-// fetch query argument named by <name>
-func (ctx *HttpHandler) GetQuery(name string) string {
+// fetch query argument named by <name>, null is default value defined by user
+func (ctx *HttpHandler) GetQuery(name string, null string) string {
 	if value, ok := ctx.query[name]; !ok {
-        return ""
+        return null
 	} else {
 		return value[0]
 	}
@@ -96,10 +96,10 @@ func (ctx *HttpHandler) GetMatchArgs() map[string]string {
     return ctx.match
 }
 
-// fetch match argument named by <name>
-func (ctx *HttpHandler) GetMatch(name string) string {
+// fetch match argument named by <name>, null is default value defined by user
+func (ctx *HttpHandler) GetMatch(name string, null string) string {
 	if value, ok := ctx.match[name]; !ok {
-        return ""
+        return null
 	} else {
 		return value
 	}
@@ -158,11 +158,12 @@ func (ctx *HttpHandler) parse_arguments(match map[string]string) {
 	ctx.prepare_query_arguments()
 	ctx.prepare_body_arguments()
 	ctx.prepare_form_arguments()
-	logger.Debug("header:%#v", ctx.Request.Header)
-	logger.Debug("match:%#v,query:%#v,body:%#v", ctx.match, ctx.query, ctx.body)
-	logger.Debug("PostForm:%#v,MultipartForm:%#v", ctx.Request.PostForm, ctx.Request.MultipartForm)
+	//logger.Debug("header:%#v", ctx.Request.Header)
+	//logger.Debug("match:%#v,query:%#v,body:%#v", ctx.match, ctx.query, ctx.body)
+	//logger.Debug("PostForm:%#v,MultipartForm:%#v", ctx.Request.PostForm, ctx.Request.MultipartForm)
 }
 
+// response redirect
 func (ctx *HttpHandler) Redirect(url string, code int) {
 	if ctx.isEnd {
 		logger.Error("HttpHandler is end!")
@@ -173,6 +174,7 @@ func (ctx *HttpHandler) Redirect(url string, code int) {
 	ctx.isEnd = true
 }
 
+// response Http Error 
 func (ctx *HttpHandler) HTTPError(error string, code int) {
 	if ctx.isEnd {
 		logger.Error("HttpHandler is end!")
