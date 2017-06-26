@@ -3,7 +3,6 @@ package gohttp
 import (
 	"github.com/luopengift/golibs/file"
 	"github.com/luopengift/golibs/logger"
-	"time"
 )
 
 type Config struct {
@@ -12,9 +11,9 @@ type Config struct {
 	ReadHeaderTimeout int    `json:"readheadertime"`
 	WriteTimeout      int    `json:"writetime"`
 	MaxHeaderBytes    int    `json:"maxheaderbytes"`
-	CertFile          string ``
-	KeyFile           string
-	StaticPath        string
+	CertFile          string `json:"cert"`
+	KeyFile           string `json:"key"`
+	StaticPath        string `json:"static"`
 }
 
 func (cfg *Config) SetAddress(addr string) {
@@ -22,9 +21,9 @@ func (cfg *Config) SetAddress(addr string) {
 }
 
 func (cfg *Config) SetTimeout(timeout int) {
-	cfg.ReadTimeout = int(time.Duration(timeout) * time.Second)
-	cfg.ReadHeaderTimeout = int(time.Duration(timeout) * time.Second)
-	cfg.WriteTimeout = int(time.Duration(timeout) * time.Second)
+	cfg.ReadTimeout = timeout
+	cfg.ReadHeaderTimeout = timeout
+	cfg.WriteTimeout = timeout
 }
 
 func (cfg *Config) SetMaxHeaderBytes(max int) {
@@ -48,15 +47,11 @@ func InitConfig() *Config {
 	return cfg
 }
 
-func NewConfig() *Config {
-	return InitConfig()
-}
-
 func ReadConfig(name string) *Config {
 	if name == "" {
 		name = "./config.json"
 	}
-	cfg := new(Config)
+	cfg := InitConfig()
 	conf := file.NewConfig(name)
 	err := conf.Parse(cfg)
 	if err != nil {
