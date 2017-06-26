@@ -3,6 +3,7 @@ package gohttp
 import (
 	"github.com/luopengift/golibs/file"
 	"github.com/luopengift/golibs/logger"
+	"time"
 )
 
 type Config struct {
@@ -21,9 +22,9 @@ func (cfg *Config) SetAddress(addr string) {
 }
 
 func (cfg *Config) SetTimeout(timeout int) {
-	// cfg.ReadTimeout = time.Duration(timeout) * time.Second
-	// cfg.ReadHeaderTimeout = time.Duration(timeout) * time.Second
-	// cfg.WriteTimeout = time.Duration(timeout) * time.Second
+	cfg.ReadTimeout = int(time.Duration(timeout) * time.Second)
+	cfg.ReadHeaderTimeout = int(time.Duration(timeout) * time.Second)
+	cfg.WriteTimeout = int(time.Duration(timeout) * time.Second)
 }
 
 func (cfg *Config) SetMaxHeaderBytes(max int) {

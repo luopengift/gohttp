@@ -247,8 +247,8 @@ func (self *Client) newURL() (*url.URL, error) {
 }
 
 func (self *Client) URLString() string {
-    url,_ := self.newURL().String()
-    return url
+	url, _ := self.newURL()
+	return url.String()
 }
 
 func (self *Client) Get() (*Response, error)  { return self.doReq("GET") }
