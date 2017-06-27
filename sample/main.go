@@ -1,7 +1,7 @@
 package main
 
 import (
-    "github.com/luopengift/gohttp/sample/example"
+	"github.com/luopengift/gohttp/sample/example"
 )
 
 func main() {

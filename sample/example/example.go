@@ -2,57 +2,57 @@ package example
 
 import (
 	"fmt"
+	"github.com/luopengift/gohttp"
 	"net/http"
-    "github.com/luopengift/gohttp"
 )
 
 type RoutersHandler struct {
 	gohttp.HttpHandler
 }
 
-func (self *RoutersHandler) GET() {
-    self.Output(self.RouterList.String())
-    //self.Redirect("http://www.baidu.com", 301)
-	//self.Render("template/index.tpl", map[string]string{"content": "This is a test page"})
+func (ctx *RoutersHandler) GET() {
+	ctx.Output(ctx.RouterList.String())
+	//ctx.Redirect("http://www.baidu.com", 301)
+	//ctx.Render("template/index.tpl", map[string]string{"content": "This is a test page"})
 }
 
-func (self *RoutersHandler) POST() {
+func (ctx *RoutersHandler) POST() {
 	fmt.Println("tpl post")
-	self.Output("tpl post")
+	ctx.Output("tpl post")
 }
 
 type MirrorHandler struct {
 	gohttp.HttpHandler
 }
 
-func (self *MirrorHandler) Prepare() {
-	if self.Method == "GET" {
-		self.Output("hello Prepare inject")
+func (ctx *MirrorHandler) Prepare() {
+	if ctx.Method == "GET" {
+		ctx.Output("hello Prepare inject")
 	}
-	if self.Method == "PUT" {
+	if ctx.Method == "PUT" {
 		panic(http.ErrAbortHandler)
 	}
 }
 
-func (self *MirrorHandler) Run() {
-			match := self.GetMatchArgs()
-			query := self.GetQueryArgs()
-			body := self.GetBodyArgs()
-			result := map[string]interface{}{
-				"match": match,
-				"query": query,
-				"body":  string(body),
-			}
-			fmt.Println(result)
-			self.Output(result)
+func (ctx *MirrorHandler) Run() {
+	match := ctx.GetMatchArgs()
+	query := ctx.GetQueryArgs()
+	body := ctx.GetBodyArgs()
+	result := map[string]interface{}{
+		"match": match,
+		"query": query,
+		"body":  string(body),
+	}
+	fmt.Println(result)
+	ctx.Output(result)
 }
 
-func (self *MirrorHandler) GET() {
-	self.Run()
+func (ctx *MirrorHandler) GET() {
+	ctx.Run()
 }
 
-func (self *MirrorHandler) POST() {
-	self.Run()
+func (ctx *MirrorHandler) POST() {
+	ctx.Run()
 }
 
 var App *gohttp.Application

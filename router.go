@@ -25,13 +25,13 @@ func InitRouterList() *RouterList {
 	return new(RouterList)
 }
 
-func (self *RouterList) Route(path string, handler Handler) {
+func (r *RouterList) Route(path string, handler Handler) {
 	route := newroute(path, handler)
-	*self = append(*self, route)
+	*r = append(*r, route)
 }
 
-func (self *RouterList) Find(path string) (muxEntry, map[string]string) {
-	for _, route := range *self {
+func (r *RouterList) Find(path string) (muxEntry, map[string]string) {
+	for _, route := range *r {
 		if match := route.regx.FindStringSubmatch(path); match != nil {
 			kv := make(map[string]string)
 			for key, value := range route.regx.SubexpNames() {
@@ -44,9 +44,9 @@ func (self *RouterList) Find(path string) (muxEntry, map[string]string) {
 	return nil, nil
 }
 
-func (self *RouterList) String() string {
+func (r *RouterList) String() string {
 	str := "\nRouter Map:\n"
-	for _, route := range *self {
+	for _, route := range *r {
 		str += route.path + " => " + route.entry.String() + "\n"
 	}
 	return str
