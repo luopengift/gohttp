@@ -3,7 +3,6 @@
 gohttp is used for RESTful APIs, Web apps, Http services in Golang.
 It is used similar with [Tornado](http://www.tornadoweb.org).
 
-
 #### GO verion >=1.8.0
 
 #### 使用说明
@@ -11,21 +10,19 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 ```
 package main
 
-import (
-    "github.com/luopengift/gohttp"
-)
+import "github.com/luopengift/gohttp"
 
 //Handler方法实现
 type Test struct {
     gohttp.HttpHandler
 }
 
-func (self *Test) GET() {
-    self.Output("world")
+func (ctx *Test) GET() {
+    ctx.Output("world")
 }
 
-func (self *Test) POST() {
-    self.Output("hello")
+func (ctx *Test) POST() {
+    ctx.Output("hello")
 }
 
 //启动服务
