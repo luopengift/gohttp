@@ -15,35 +15,35 @@ type Request struct {
 	*http.Request
 }
 
-func (self *Request) SetHeader(k, v string) *Request {
-	self.Header.Add(k, v)
-	return self
+func (req *Request) SetHeader(k, v string) *Request {
+	req.Header.Add(k, v)
+	return req
 }
 
-func (self *Request) SetHeaders(kv map[string]string) *Request {
+func (req *Request) SetHeaders(kv map[string]string) *Request {
 	for k, v := range kv {
-		self.SetHeader(k, v)
+		req.SetHeader(k, v)
 	}
-	return self
+	return req
 }
 
 type Response struct {
 	*http.Response
 }
 
-func (self *Response) Code() int {
-	return self.StatusCode
+func (resp *Response) Code() int {
+	return resp.StatusCode
 }
 
-func (self *Response) Bytes() ([]byte, error) {
-	return ioutil.ReadAll(self.Body)
+func (resp *Response) Bytes() ([]byte, error) {
+	return ioutil.ReadAll(resp.Body)
 }
 
-func (self *Response) String() string {
-	if resp, err := self.Bytes(); err != nil {
+func (resp *Response) String() string {
+	if response, err := resp.Bytes(); err != nil {
 		return ""
 	} else {
-		return string(resp)
+		return string(response)
 	}
 
 }
@@ -93,68 +93,68 @@ func parseBody(v interface{}) (io.Reader, error) {
 	return body, nil
 }
 
-func (self *Client) newRequest() (*http.Request, error) {
-	u, err := self.newURL()
+func (c *Client) newRequest() (*http.Request, error) {
+	u, err := c.newURL()
 	if err != nil {
 		return nil, err
 	}
 
-	body, err := parseBody(self.body)
+	body, err := parseBody(c.body)
 	if err != nil {
 		return nil, err
 	}
 
-	req, err := NewRequest(self.method, u.String(), body)
-	for k, v := range self.headers {
+	req, err := NewRequest(c.method, u.String(), body)
+	for k, v := range c.headers {
 		req.Header.Set(k, v)
 	}
-	for k, v := range self.cookies {
+	for k, v := range c.cookies {
 		req.AddCookie(&http.Cookie{Name: k, Value: v})
 	}
 	return req.Request, err
 }
 
-func (self *Client) setClient() (*http.Client, error) {
-	if self.proxy != "" {
-		proxy, err := url.Parse(self.proxy)
+func (c *Client) setClient() (*http.Client, error) {
+	if c.proxy != "" {
+		proxy, err := url.Parse(c.proxy)
 		if err != nil {
 			return nil, err
 		}
-		self.transport.Proxy = http.ProxyURL(proxy)
+		c.transport.Proxy = http.ProxyURL(proxy)
 	}
-	self.transport.DisableKeepAlives = !self.keepAlived
-	self.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !self.verifySsl}
-	client := &http.Client{Transport: &self.transport}
-	client.Timeout = time.Duration(self.timeout) * time.Second
+	c.transport.DisableKeepAlives = !c.keepAlived
+	c.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !c.verifySsl}
+	client := &http.Client{Transport: &c.transport}
+	client.Timeout = time.Duration(c.timeout) * time.Second
 	return client, nil
 }
 
-func (self *Client) Reset() *Client {
-	self.method = "GET"
-	self.url = ""
-	self.path = ""
-	self.query = ""
-	self.fragment = ""
-	self.cookies = make(map[string]string)
-	self.headers = make(map[string]string)
-	self.body = nil
-	self.proxy = ""
-	self.timeout = 0
-	self.retries = 0
-	self.verifySsl = false
-	self.keepAlived = true
-	self.transport = http.Transport{}
-	return self
+func (c *Client) Reset() *Client {
+	c.method = "GET"
+	c.url = ""
+	c.path = ""
+	c.query = ""
+	c.fragment = ""
+	c.cookies = make(map[string]string)
+	c.headers = make(map[string]string)
+	c.body = nil
+	c.proxy = ""
+	c.timeout = 0
+	c.retries = 0
+	c.verifySsl = false
+	c.keepAlived = true
+	c.transport = http.Transport{}
+	return c
 }
 
-func (self *Client) doReq(method string) (*Response, error) {
-	self.method = method
-	req, err := self.newRequest()
+func (c *Client) doReq(method string) (*Response, error) {
+	c.method = method
+	req, err := c.newRequest()
 	if err != nil {
 		return nil, err
 	}
 
-	client, err := self.setClient()
+	client, err := c.setClient()
 	if err != nil {
 		return nil, err
 	}
@@ -164,94 +164,94 @@ func (self *Client) doReq(method string) (*Response, error) {
 }
 
 // 长连接,Default is true
-func (self *Client) KeepAlived(used bool) *Client {
-	self.keepAlived = used
-	return self
+func (c *Client) KeepAlived(used bool) *Client {
+	c.keepAlived = used
+	return c
 }
 
 // 强制使用HTTPS,Default is false
-func (self *Client) VerifySSL(used bool) *Client {
-	self.verifySsl = used
-	return self
+func (c *Client) VerifySSL(used bool) *Client {
+	c.verifySsl = used
+	return c
 }
 
-func (self *Client) URL(urlstr string) *Client {
-	self.url = urlstr
-	return self
+func (c *Client) URL(urlstr string) *Client {
+	c.url = urlstr
+	return c
 }
 
-func (self *Client) Path(path string) *Client {
-	self.path = path
-	return self
+func (c *Client) Path(path string) *Client {
+	c.path = path
+	return c
 }
 
-func (self *Client) Query(kv map[string]string) *Client {
+func (c *Client) Query(kv map[string]string) *Client {
 	query := []string{}
 	for k, v := range kv {
 		s := k + "=" + url.QueryEscape(v)
 		query = append(query, s)
 	}
-	self.query = strings.Join(query, "&")
-	return self
+	c.query = strings.Join(query, "&")
+	return c
 }
 
-func (self *Client) Proxy(proxy string) *Client {
-	self.proxy = proxy
-	return self
+func (c *Client) Proxy(proxy string) *Client {
+	c.proxy = proxy
+	return c
 }
 
-func (self *Client) Timeout(timeout int) *Client {
-	self.timeout = timeout
-	return self
+func (c *Client) Timeout(timeout int) *Client {
+	c.timeout = timeout
+	return c
 }
 
-func (self *Client) Cookie(k, v string) *Client {
-	self.cookies[k] = v
-	return self
+func (c *Client) Cookie(k, v string) *Client {
+	c.cookies[k] = v
+	return c
 }
 
-func (self *Client) Header(k, v string) *Client {
-	self.headers[k] = v
-	return self
+func (c *Client) Header(k, v string) *Client {
+	c.headers[k] = v
+	return c
 }
 
-func (self *Client) Headers(kv map[string]string) *Client {
+func (c *Client) Headers(kv map[string]string) *Client {
 	for k, v := range kv {
-		self.Header(k, v)
+		c.Header(k, v)
 	}
-	return self
+	return c
 }
 
-func (self *Client) Body(body interface{}) *Client {
-	self.body = body
-	return self
+func (c *Client) Body(body interface{}) *Client {
+	c.body = body
+	return c
 }
 
-func (self *Client) Retries(count int) *Client {
-	self.retries = count
-	return self
+func (c *Client) Retries(count int) *Client {
+	c.retries = count
+	return c
 }
 
-func (self *Client) newURL() (*url.URL, error) {
-	u, err := url.Parse(self.url)
+func (c *Client) newURL() (*url.URL, error) {
+	u, err := url.Parse(c.url)
 	if err != nil {
 		return u, err
 	}
-	if self.path != "" {
-		u.Path = self.path
+	if c.path != "" {
+		u.Path = c.path
 	}
-	if self.query != "" {
-		u.RawQuery = self.query
+	if c.query != "" {
+		u.RawQuery = c.query
 	}
 	return u, err
 }
 
-func (self *Client) URLString() string {
-	url, _ := self.newURL()
+func (c *Client) URLString() string {
+	url, _ := c.newURL()
 	return url.String()
 }
 
-func (self *Client) Get() (*Response, error)  { return self.doReq("GET") }
-func (self *Client) Post() (*Response, error) { return self.doReq("POST") }
-func (self *Client) Head() (*Response, error) { return self.doReq("HEAD") }
-func (self *Client) Put() (*Response, error)  { return self.doReq("PUT") }
+func (c *Client) Get() (*Response, error)  { return c.doReq("GET") }
+func (c *Client) Post() (*Response, error) { return c.doReq("POST") }
+func (c *Client) Head() (*Response, error) { return c.doReq("HEAD") }
+func (c *Client) Put() (*Response, error)  { return c.doReq("PUT") }
