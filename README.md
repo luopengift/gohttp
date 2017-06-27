@@ -1,8 +1,10 @@
-# gohttp
-1. simple http framework for golang
-2. **Documentation:** [![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
+# gohttp [![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
 
-### 模拟tornado
+gohttp is used for RESTful APIs, Web apps, Http services in Golang.
+It is used similar with [Tornado](http://www.tornadoweb.org).
+
+
+#### GO verion >=1.8.0
 
 #### 使用说明
 1. HTTP server
@@ -28,13 +30,10 @@ func (self *Test) POST() {
 
 //启动服务
 func main() {
+    app := gohttp.Init() 
     //绑定路由
-    gohttp.RouterRegister("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
-    gohttp.HttpRun(&gohttp.Config{
-        Addr:     ":9999",
-        CertFile: "./server.cert",
-        KeyFile:  "./server.key",
-    })
+    app.Route("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
+    app.Run("8080")
 }
 ```
 2. HTTP client
