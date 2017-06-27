@@ -1,4 +1,6 @@
-# gohttp [![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
+# gohttp 
+[![BuildStatus](https://travis-ci.org/luopengift/gohttp.svg?branch=master)](https://travis-ci.org/luopengift/gohttp)
+[![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
 
 gohttp is used for RESTful APIs, Web apps, Http services in Golang.
 It is used similar with [Tornado](http://www.tornadoweb.org).
