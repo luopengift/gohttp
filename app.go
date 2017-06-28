@@ -2,13 +2,13 @@ package gohttp
 
 import (
 	"fmt"
-	"github.com/luopengift/golibs/logger"
+	"time"
+	"reflect"
+	"strings"
 	"net/http"
 	"path/filepath"
-	"reflect"
 	"runtime/debug"
-	"strings"
-	"time"
+	"github.com/luopengift/golibs/logger"
 )
 
 type Application struct {
@@ -71,8 +71,9 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 
 	// handler static file
 	if strings.HasPrefix(ctx.Path, "/static") || hasSuffixs(ctx.Path) {
-		file := filepath.Join("/static", ctx.Path)
-		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
+		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
+		//TODO BUG: if file is not found, log http status is 200
+        http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		goto END
 	}
 

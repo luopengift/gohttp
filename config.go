@@ -44,6 +44,7 @@ func InitConfig() *Config {
 	cfg.SetAddress(":18081")
 	cfg.SetTimeout(30)
 	cfg.SetMaxHeaderBytes(1 << 20) //DefaultMaxHeaderBytes 1MB
+    cfg.SetStaticPath(".")
 	return cfg
 }
 

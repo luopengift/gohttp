@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+    "path/filepath"
 )
 
 type Handler interface {
@@ -216,12 +217,18 @@ func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 		logger.Error("HttpHandler is end!")
 		return
 	}
-	if template, ok := (*ctx.Template)[tpl]; !ok {
+    path := filepath.Join(ctx.Config.StaticPath,tpl)
+	if _, ok := (*ctx.Template)[path]; !ok {
+        (*ctx.Template).AddFile(path)
+    }
+    if template, ok := (*ctx.Template)[path]; !ok {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	} else {
+	    return
+    } else {
 		ctx.render(template, data)
 		ctx.isEnd = true
-	}
+	    return
+    }
 }
 
 // render html data to client
