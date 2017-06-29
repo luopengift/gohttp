@@ -1,46 +1,27 @@
-# gohttp 
+# gohttp
 [![BuildStatus](https://travis-ci.org/luopengift/gohttp.svg?branch=master)](https://travis-ci.org/luopengift/gohttp)
+[![GoDoc](https://godoc.org/github.com/luopengift/gohttp?status.svg)](https://godoc.org/github.com/luopengift/gohttp)
 [![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
+
+---
 
 gohttp is used for RESTful APIs, Web apps, Http services in Golang.
 It is used similar with [Tornado](http://www.tornadoweb.org).
 
-#### GO verion >=1.8.0
+### GO verion >=1.8.0
 
 ## Getting started
-1. HTTP server
-```
-package main
 
-import "github.com/luopengift/gohttp"
+#### Sample example
 
-//Handler方法实现
-type Test struct {
-    gohttp.HttpHandler
-}
+* Simple Server Application: [server](https://github.com/luopengift/gohttp/blob/master/sample/server.go)
+* Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/sample/client.go)
 
-func (ctx *Test) GET() {
-    ctx.Output("world")
-}
+#### Download and Install
+* go get github.com/luopengift/gohttp
 
-func (ctx *Test) POST() {
-    ctx.Output("hello")
-}
-
-//启动服务
-func main() {
-    app := gohttp.Init() 
-    //绑定路由
-    app.Route("^/(?P<ID>[0-9]*)/(?P<NAME>[a-zA-Z]*)$", &Test{})
-    app.Run("8080")
-}
-```
-2. HTTP client
-```
-resp,err := gohttp.NewClient().URL(http://www.google.com).Header("Content-Type","application/json;charset=utf-8").Get()
-fmt.Println(resp.String())
-```
-
+#### Run
+* go run  $GOPATH/src/github.com/luopengift/gohttp/sample/server.go
 
 ## Contributing
 
@@ -51,4 +32,9 @@ fmt.Println(resp.String())
 5. Create new Pull Request
 
 ## Author
-[@luopengift](luopengift@foxmai.com)
+[@luopengift](luopengift@foxmail.com)
+
+##License
+
+gohttp source code is licensed under the [Apache Licence 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+
