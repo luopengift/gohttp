@@ -2,13 +2,13 @@ package gohttp
 
 import (
 	"fmt"
-	"time"
-	"reflect"
-	"strings"
+	"github.com/luopengift/golibs/logger"
 	"net/http"
 	"path/filepath"
+	"reflect"
 	"runtime/debug"
-	"github.com/luopengift/golibs/logger"
+	"strings"
+	"time"
 )
 
 type Application struct {
@@ -73,7 +73,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 	if strings.HasPrefix(ctx.Path, "/static") || hasSuffixs(ctx.Path) {
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
 		//TODO BUG: if file is not found, log http status is 200
-        http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
+		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		goto END
 	}
 
@@ -107,7 +107,6 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		}
 	}
 END:
-	//[2017-06-21 08:13:36,755] INFO     200 GET /static/minimal/js/vendor/chosen/chosen.jquery.min.js (172.31.9.94) 1.44ms
 	switch ctx.status {
 	case 200, 301:
 		logger.Info(format, ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))

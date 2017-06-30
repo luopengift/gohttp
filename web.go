@@ -5,8 +5,10 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
-    "path/filepath"
 )
 
 type Handler interface {
@@ -79,6 +81,11 @@ func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWrite
 	ctx.isEnd = false
 	ctx.Header = make(map[string]string)
 	ctx.status = http.StatusOK
+}
+
+// App returns *Application instance in this HttpHandler context.
+func (ctx *HttpHandler) App() *Application {
+	return ctx.Application
 }
 
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
@@ -217,18 +224,18 @@ func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 		logger.Error("HttpHandler is end!")
 		return
 	}
-    path := filepath.Join(ctx.Config.StaticPath,tpl)
+	path := filepath.Join(ctx.Config.StaticPath, tpl)
 	if _, ok := (*ctx.Template)[path]; !ok {
-        (*ctx.Template).AddFile(path)
-    }
-    if template, ok := (*ctx.Template)[path]; !ok {
+		(*ctx.Template).AddFile(path)
+	}
+	if template, ok := (*ctx.Template)[path]; !ok {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	    return
-    } else {
+		return
+	} else {
 		ctx.render(template, data)
 		ctx.isEnd = true
-	    return
-    }
+		return
+	}
 }
 
 // render html data to client
@@ -248,6 +255,32 @@ func (ctx *HttpHandler) SetHeader(name, value string) {
 // set response status code int status
 func (ctx *HttpHandler) SetStatusCode(code int) {
 	ctx.status = code
+}
+
+// file download response by file path.
+func (ctx *HttpHandler) Download(file string) {
+	if ctx.isEnd {
+		logger.Error("HttpHandler is end!")
+		return
+	}
+	f, err := os.Stat(file)
+	if err != nil {
+		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound) //404
+		return
+	}
+	if f.IsDir() {
+		ctx.HTTPError(http.StatusText(http.StatusForbidden), http.StatusForbidden) //403
+		return
+	}
+	ctx.ResponseWriter.Header().Set("Content-Type", "application/octet-stream")
+	ctx.ResponseWriter.Header().Set("Content-Disposition", "attachment; filename="+path.Base(file))
+	ctx.ResponseWriter.Header().Set("Content-Transfer-Encoding", "binary")
+	ctx.ResponseWriter.Header().Set("Expires", "0")
+	ctx.ResponseWriter.Header().Set("Cache-Control", "must-revalidate")
+	ctx.ResponseWriter.Header().Set("Pragma", "public")
+	http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
+	ctx.isEnd = true
+	return
 }
 
 func (ctx *HttpHandler) Prepare() {}
