@@ -27,7 +27,7 @@ type MirrorHandler struct {
 
 func (ctx *MirrorHandler) Prepare() {
 	if ctx.Method == "GET" {
-		ctx.Output("hello Prepare inject")
+		ctx.Output("hello Prepare inject",401)
 	}
 	if ctx.Method == "PUT" {
 		panic(http.ErrAbortHandler)

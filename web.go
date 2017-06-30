@@ -3,12 +3,10 @@ package gohttp
 import (
 	"github.com/luopengift/golibs/logger"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 )
 
 type Handler interface {
@@ -19,37 +17,17 @@ type Handler interface {
 	init(*Application, http.ResponseWriter, *http.Request)
 }
 
-/*--------------*/
-
 type HttpHandler struct {
 	// application
 	*Application
-	// native *http.Request
-	*http.Request
+
+	// request based native *http.Request
+	*request
 
 	// ResponseEriter based native http.ResponseWrite
 	// Implements http.ResponseWriter interface and some extra interface,
 	// Such as, Status() int, Finished() bool, Size() int
 	ResponseWriter
-
-	// request method
-	Method string
-
-	// request url
-	URL string
-
-	// request host without port
-	Remote string
-	//
-	Path string
-	// request path regx match arguments
-	match map[string]string
-	//request query arguments
-	query map[string][]string
-	// request body arguments
-	body []byte
-	// TODO:request form arguments
-	form map[string][]string
 }
 
 func NewHttpHandler(app *Application, responsewriter http.ResponseWriter, request *http.Request) *HttpHandler {
@@ -60,16 +38,8 @@ func NewHttpHandler(app *Application, responsewriter http.ResponseWriter, reques
 
 func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWriter, request *http.Request) {
 	ctx.Application = app
-	ctx.Request = request
+	ctx.request = NewRequestReader(request)
 	ctx.ResponseWriter = NewResponseWriter(responsewriter)
-	ctx.Method = request.Method
-	ctx.URL = request.RequestURI
-	ctx.Remote = strings.Split(request.RemoteAddr, ":")[0]
-	ctx.Path = request.URL.Path
-	ctx.match = make(map[string]string)
-	ctx.query = make(map[string][]string)
-	ctx.body = []byte{}
-	ctx.form = make(map[string][]string)
 }
 
 // App returns *Application instance in this HttpHandler context.
@@ -123,45 +93,6 @@ func (ctx *HttpHandler) GetForm(name string) string {
 	return ""
 }
 
-// prepare match and assignment to match arguments
-func (ctx *HttpHandler) prepare_match_arguments(match map[string]string) {
-	ctx.match = match
-}
-
-// prepare query and assignment to query arguments
-func (ctx *HttpHandler) prepare_query_arguments() {
-	ctx.query = ctx.Request.Form
-}
-
-// prepare body and assignment to body arguments
-func (ctx *HttpHandler) prepare_body_arguments() {
-	var err error
-	ctx.body, err = ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// prepare form and assignment to form arguments
-// Content-Type:application/x-www-form-urlencoded
-func (ctx *HttpHandler) prepare_form_arguments() {
-	ctx.form = ctx.Request.PostForm
-}
-
-// parse and handler arguments
-func (ctx *HttpHandler) parse_arguments(match map[string]string) {
-	// parse form automatically
-	ctx.Request.ParseForm()
-
-	ctx.prepare_match_arguments(match)
-	ctx.prepare_query_arguments()
-	ctx.prepare_body_arguments()
-	ctx.prepare_form_arguments()
-	//logger.Debug("header:%#v", ctx.Request.Header)
-	//logger.Debug("match:%#v,query:%#v,body:%#v", ctx.match, ctx.query, ctx.body)
-	//logger.Debug("PostForm:%#v,MultipartForm:%#v", ctx.Request.PostForm, ctx.Request.MultipartForm)
-}
-
 // response redirect
 func (ctx *HttpHandler) Redirect(url string, code int) {
 	ctx.WriteHeader(code)
@@ -178,11 +109,15 @@ func (ctx *HttpHandler) HTTPError(error string, code int) {
 }
 
 // If response is sent, do not sent again
-func (ctx *HttpHandler) Output(v interface{}) {
-	if response, err := ToBytes(v); err != nil {
+func (ctx *HttpHandler) Output(v interface{}, code ...int) {
+	response, err := ToBytes(v)
+	if err != nil {
 		panic(err)
-	} else {
+	}
+	if len(code) == 0 {
 		ctx.output(response, 200)
+	} else {
+		ctx.output(response, code[0])
 	}
 }
 

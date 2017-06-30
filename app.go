@@ -60,7 +60,6 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 
 	// init a new http handler
 	ctx := NewHttpHandler(app, responsewriter, request)
-
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
@@ -74,7 +73,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
 		//TODO BUG: if file is not found, log http status is 200
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
-		goto END
+        goto END
 	}
 
 	// route matching
@@ -91,9 +90,9 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		exec.parse_arguments(match)
 		exec.Prepare()
 
-		// check status of isEnd, knows prepare is ending handler
+		// check if status is not default value 0, knows prepare is finished handler
 		if ctx.Finished() {
-			goto END
+			goto END //Finished
 		}
 		if method := handle.MethodByName(ctx.Method); bool(method == reflect.Value{}) {
 			ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -115,5 +114,4 @@ END:
 	default:
 		logger.Error(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
-
 }
