@@ -14,8 +14,8 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 
 #### Sample example
 
-* Simple Server Application: [server](https://github.com/luopengift/gohttp/blob/master/sample/server.go)
-* Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/sample/client.go)
+* Simple Server Application: [server](https://github.com/luopengift/gohttp/blob/master/example/server/main.go)
+* Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/example/client/main.go)
 
 #### Download and Install
 * go get github.com/luopengift/gohttp
@@ -34,7 +34,7 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 ## Author
 [@luopengift](luopengift@foxmail.com)
 
-##License
+## License
 
 gohttp source code is licensed under the [Apache Licence 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
