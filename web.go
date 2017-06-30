@@ -3,12 +3,10 @@ package gohttp
 import (
 	"github.com/luopengift/golibs/logger"
 	"html/template"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"strings"
 )
 
 type Handler interface {
@@ -19,45 +17,17 @@ type Handler interface {
 	init(*Application, http.ResponseWriter, *http.Request)
 }
 
-/*--------------*/
-
 type HttpHandler struct {
 	// application
 	*Application
-	// native *http.Request
-	*http.Request
-	// request method
-	Method string
 
-	// request url
-	URL string
+	// request based native *http.Request
+	*request
 
-	// request host without port
-	Remote string
-	//
-	Path string
-	// request path regx match arguments
-	match map[string]string
-	//request query arguments
-	query map[string][]string
-	// request body arguments
-	body []byte
-	// TODO:request form arguments
-	form map[string][]string
-
-	// native http.ResponseWrite
-	http.ResponseWriter
-
-	// response is end or not
-	isEnd bool
-
-	// response header map
-	Header map[string]string
-	// response status code
-	status int
-
-	// contain datas need response to client
-	response []byte
+	// ResponseEriter based native http.ResponseWrite
+	// Implements http.ResponseWriter interface and some extra interface,
+	// Such as, Status() int, Finished() bool, Size() int
+	ResponseWriter
 }
 
 func NewHttpHandler(app *Application, responsewriter http.ResponseWriter, request *http.Request) *HttpHandler {
@@ -68,19 +38,8 @@ func NewHttpHandler(app *Application, responsewriter http.ResponseWriter, reques
 
 func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWriter, request *http.Request) {
 	ctx.Application = app
-	ctx.Request = request
-	ctx.Method = request.Method
-	ctx.URL = request.RequestURI
-	ctx.Remote = strings.Split(request.RemoteAddr, ":")[0]
-	ctx.Path = request.URL.Path
-	ctx.match = make(map[string]string)
-	ctx.query = make(map[string][]string)
-	ctx.body = []byte{}
-	ctx.form = make(map[string][]string)
-	ctx.ResponseWriter = responsewriter
-	ctx.isEnd = false
-	ctx.Header = make(map[string]string)
-	ctx.status = http.StatusOK
+	ctx.request = NewRequestReader(request)
+	ctx.ResponseWriter = NewResponseWriter(responsewriter)
 }
 
 // App returns *Application instance in this HttpHandler context.
@@ -134,96 +93,45 @@ func (ctx *HttpHandler) GetForm(name string) string {
 	return ""
 }
 
-// prepare match and assignment to match arguments
-func (ctx *HttpHandler) prepare_match_arguments(match map[string]string) {
-	ctx.match = match
-}
-
-// prepare query and assignment to query arguments
-func (ctx *HttpHandler) prepare_query_arguments() {
-	ctx.query = ctx.Request.Form
-}
-
-// prepare body and assignment to body arguments
-func (ctx *HttpHandler) prepare_body_arguments() {
-	var err error
-	ctx.body, err = ioutil.ReadAll(ctx.Request.Body)
-	if err != nil {
-		panic(err)
-	}
-}
-
-// prepare form and assignment to form arguments
-// Content-Type:application/x-www-form-urlencoded
-func (ctx *HttpHandler) prepare_form_arguments() {
-	ctx.form = ctx.Request.PostForm
-}
-
-// parse and handler arguments
-func (ctx *HttpHandler) parse_arguments(match map[string]string) {
-	// parse form automatically
-	ctx.Request.ParseForm()
-
-	ctx.prepare_match_arguments(match)
-	ctx.prepare_query_arguments()
-	ctx.prepare_body_arguments()
-	ctx.prepare_form_arguments()
-	//logger.Debug("header:%#v", ctx.Request.Header)
-	//logger.Debug("match:%#v,query:%#v,body:%#v", ctx.match, ctx.query, ctx.body)
-	//logger.Debug("PostForm:%#v,MultipartForm:%#v", ctx.Request.PostForm, ctx.Request.MultipartForm)
-}
-
 // response redirect
 func (ctx *HttpHandler) Redirect(url string, code int) {
-	if ctx.isEnd {
-		logger.Error("HttpHandler is end!")
-		return
-	}
-	ctx.status = code
+	ctx.WriteHeader(code)
 	http.Redirect(ctx.ResponseWriter, ctx.Request, url, code)
-	ctx.isEnd = true
 }
 
 // response Http Error
 func (ctx *HttpHandler) HTTPError(error string, code int) {
-	if ctx.isEnd {
-		logger.Error("HttpHandler is end!")
-		return
-	}
-	ctx.status = code
-	http.Error(ctx.ResponseWriter, error, code)
-	ctx.isEnd = true
+
+	ctx.ResponseWriter.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	ctx.ResponseWriter.Header().Set("X-Content-Type-Options", "nosniff")
+	ctx.output([]byte(error), code)
+
 }
 
 // If response is sent, do not sent again
-func (ctx *HttpHandler) Output(v interface{}) {
-	if ctx.isEnd {
-		logger.Error("HttpHandler is end!")
-		return
-	}
-	if response, err := ToBytes(v); err != nil {
+func (ctx *HttpHandler) Output(v interface{}, code ...int) {
+	response, err := ToBytes(v)
+	if err != nil {
 		panic(err)
+	}
+	if len(code) == 0 {
+		ctx.output(response, 200)
 	} else {
-		ctx.output(response)
-		ctx.isEnd = true
+		ctx.output(response, code[0])
 	}
 }
 
 // response data from server to client
-func (ctx *HttpHandler) output(response []byte) {
-	for name, value := range ctx.Header {
-		ctx.ResponseWriter.Header().Set(name, value)
-	}
-	ctx.ResponseWriter.WriteHeader(ctx.status)
+func (ctx *HttpHandler) output(response []byte, code int) {
+	//for name, value := range ctx.Header {
+	//	ctx.ResponseWriter.Header().Set(name, value)
+	//}
+	ctx.WriteHeader(code)
 	ctx.ResponseWriter.Write(response)
 }
 
 // If response is sent, do not sent again
 func (ctx *HttpHandler) Render(tpl string, data interface{}) {
-	if ctx.isEnd {
-		logger.Error("HttpHandler is end!")
-		return
-	}
 	path := filepath.Join(ctx.Config.StaticPath, tpl)
 	if _, ok := (*ctx.Template)[path]; !ok {
 		(*ctx.Template).AddFile(path)
@@ -233,33 +141,22 @@ func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 		return
 	} else {
 		ctx.render(template, data)
-		ctx.isEnd = true
 		return
 	}
 }
 
 // render html data to client
 func (ctx *HttpHandler) render(tpl *template.Template, data interface{}) {
-	for name, value := range ctx.Header {
-		ctx.ResponseWriter.Header().Set(name, value)
-	}
-	ctx.ResponseWriter.WriteHeader(ctx.status)
+	//for name, value := range ctx.Header {
+	//	ctx.ResponseWriter.Header().Set(name, value)
+	//}
+	ctx.WriteHeader(http.StatusOK) //200
 	(*tpl).Execute(ctx.ResponseWriter, data)
-}
-
-// set response header into Header
-func (ctx *HttpHandler) SetHeader(name, value string) {
-	ctx.Header[name] = value
-}
-
-// set response status code int status
-func (ctx *HttpHandler) SetStatusCode(code int) {
-	ctx.status = code
 }
 
 // file download response by file path.
 func (ctx *HttpHandler) Download(file string) {
-	if ctx.isEnd {
+	if ctx.Finished() {
 		logger.Error("HttpHandler is end!")
 		return
 	}
@@ -279,7 +176,6 @@ func (ctx *HttpHandler) Download(file string) {
 	ctx.ResponseWriter.Header().Set("Cache-Control", "must-revalidate")
 	ctx.ResponseWriter.Header().Set("Pragma", "public")
 	http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
-	ctx.isEnd = true
 	return
 }
 

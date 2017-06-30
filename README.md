@@ -14,8 +14,8 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 
 #### Sample example
 
-* Simple Server Application: [server](https://github.com/luopengift/gohttp/blob/master/sample/server.go)
-* Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/sample/client.go)
+* Simple Server Application: [server](https://github.com/luopengift/gohttp/blob/master/example/server/main.go)
+* Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/example/client/main.go)
 
 #### Download and Install
 * go get github.com/luopengift/gohttp

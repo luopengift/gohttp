@@ -60,12 +60,11 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 
 	// init a new http handler
 	ctx := NewHttpHandler(app, responsewriter, request)
-
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable) //503
-			logger.Error(format+" | %v", ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
+			logger.Error(format+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
 
@@ -74,7 +73,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
 		//TODO BUG: if file is not found, log http status is 200
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
-		goto END
+        goto END
 	}
 
 	// route matching
@@ -87,14 +86,13 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		if !ok {
 			panic("exec is not Handler")
 		}
-		exec.init(app, responsewriter, request)
+		exec.init(app, ctx.ResponseWriter, ctx.Request)
 		exec.parse_arguments(match)
 		exec.Prepare()
 
-		ctx.isEnd = reflect.Indirect(handle).FieldByName("isEnd").Bool()
-		// check status of isEnd, knows prepare is ending handler
-		if ctx.isEnd {
-			goto END
+		// check if status is not default value 0, knows prepare is finished handler
+		if ctx.Finished() {
+			goto END //Finished
 		}
 		if method := handle.MethodByName(ctx.Method); bool(method == reflect.Value{}) {
 			ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
@@ -102,20 +100,18 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		} else {
 			method.Call(nil)
 			exec.Finish()
-			ctx.status = int(reflect.Indirect(handle).FieldByName("status").Int())
 			goto END
 		}
 	}
 END:
-	switch ctx.status {
+	switch ctx.Status() {
 	case 200, 301:
-		logger.Info(format, ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Info(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 400, 401, 403, 404, 405:
-		logger.Warn(format, ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Warn(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 500, 501, 502, 503:
-		logger.Error(format, ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Error(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	default:
-		logger.Error(format, ctx.status, ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Error(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
-
 }
