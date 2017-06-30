@@ -34,7 +34,7 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 ## Author
 [@luopengift](luopengift@foxmail.com)
 
-##License
+## License
 
 gohttp source code is licensed under the [Apache Licence 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
