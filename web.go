@@ -2,7 +2,8 @@ package gohttp
 
 import (
 	"github.com/luopengift/golibs/logger"
-	"html/template"
+    "time"
+    "html/template"
 	"net/http"
 	"os"
 	"path"
@@ -46,6 +47,25 @@ func (ctx *HttpHandler) init(app *Application, responsewriter http.ResponseWrite
 func (ctx *HttpHandler) App() *Application {
 	return ctx.Application
 }
+
+func cookie(name, value string, expire int) *http.Cookie{
+    cookie := &http.Cookie{
+        Name:    name,
+        Value:   value,
+        Path:    "/",
+        MaxAge:  expire,
+        Expires: time.Now().Add(time.Duration(expire) * time.Second),
+    }
+    return cookie
+}
+
+
+// set cookie for response
+func (ctx *HttpHandler) SetCookie(name, value string) {
+    cookie := cookie(name, value, 86400)
+    http.SetCookie(ctx.ResponseWriter, cookie)
+}
+
 
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
 	return ctx.query
