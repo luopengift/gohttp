@@ -153,6 +153,8 @@ func (ctx *HttpHandler) output(response []byte, code int) {
 // If response is sent, do not sent again
 func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 	path := filepath.Join(ctx.Config.StaticPath, tpl)
+
+    //TODO:check it twice,not a good choice
 	if _, ok := (*ctx.Template)[path]; !ok {
 		(*ctx.Template).AddFile(path)
 	}

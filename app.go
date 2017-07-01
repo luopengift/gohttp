@@ -63,7 +63,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
-			ctx.HTTPError(http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable) //503
+			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
 			logger.Error(format+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
