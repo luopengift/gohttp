@@ -181,7 +181,7 @@ func (c *Client) URL(urlstr string) *Client {
 }
 
 func (c *Client) Path(path string) *Client {
-	c.path = path
+	c.path += path
 	return c
 }
 
