@@ -36,6 +36,7 @@ func (resp *Response) Code() int {
 }
 
 func (resp *Response) Bytes() ([]byte, error) {
+	defer resp.Body.Close()
 	return ioutil.ReadAll(resp.Body)
 }
 
@@ -54,6 +55,7 @@ func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
 }
 
 type Client struct {
+	client     *http.Client
 	method     string
 	url        string
 	path       string
@@ -114,19 +116,19 @@ func (c *Client) newRequest() (*http.Request, error) {
 	return req.Request, err
 }
 
-func (c *Client) setClient() (*http.Client, error) {
+func (c *Client) setClient() error {
 	if c.proxy != "" {
 		proxy, err := url.Parse(c.proxy)
 		if err != nil {
-			return nil, err
+			return err
 		}
 		c.transport.Proxy = http.ProxyURL(proxy)
 	}
 	c.transport.DisableKeepAlives = !c.keepAlived
 	c.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !c.verifySsl}
-	client := &http.Client{Transport: &c.transport}
-	client.Timeout = time.Duration(c.timeout) * time.Second
-	return client, nil
+	c.client = &http.Client{Transport: &c.transport}
+	c.client.Timeout = time.Duration(c.timeout) * time.Second
+	return nil
 }
 
 func (c *Client) Reset() *Client {
@@ -154,12 +156,12 @@ func (c *Client) doReq(method string) (*Response, error) {
 		return nil, err
 	}
 
-	client, err := c.setClient()
+	err = c.setClient()
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := client.Do(req)
+	resp, err := c.client.Do(req)
 	return &Response{resp}, err
 }
 
