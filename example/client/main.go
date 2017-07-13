@@ -5,6 +5,12 @@ import (
     "github.com/luopengift/gohttp"
 )
 func main() {
-    resp,err := gohttp.NewClient().URL("http://www.baidu.com").Header("Content-Type","application/json;charset=utf-8").Get()
-    fmt.Println(resp.String(), err)
+    client := gohttp.NewClient().URL("http://www.baidu.com").Header("Content-Type","application/json;charset=utf-8")
+	for _,_ = range []int{1,2,3,4} {
+		
+		resp,err := client.Get()
+		fmt.Println(fmt.Sprintf("%#v",client))	
+    		fmt.Println(resp.Code(), err)
+	}
+
 }

@@ -56,6 +56,7 @@ func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
 
 type Client struct {
 	client     *http.Client
+	transport  *http.Transport
 	method     string
 	url        string
 	path       string
@@ -69,17 +70,18 @@ type Client struct {
 	retries    int
 	verifySsl  bool //true:强制使用https,false:不校验https证书
 	keepAlived bool
-	transport  http.Transport
 }
 
 func NewClient() *Client {
-	return &Client{
-		method:     "GET",
-		cookies:    make(map[string]string),
-		headers:    make(map[string]string),
-		verifySsl:  false,
-		keepAlived: true,
-	}
+	c := new(Client)
+	c.client = new(http.Client)
+	c.transport = new(http.Transport)
+	c.method = "GET"
+	c.cookies = make(map[string]string)
+	c.headers = make(map[string]string)
+	c.verifySsl = false
+	c.keepAlived = true
+	return c
 }
 
 //构造request body [interface{} -> io.Reader]
@@ -126,7 +128,7 @@ func (c *Client) setClient() error {
 	}
 	c.transport.DisableKeepAlives = !c.keepAlived
 	c.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !c.verifySsl}
-	c.client = &http.Client{Transport: &c.transport}
+	c.client.Transport = c.transport
 	c.client.Timeout = time.Duration(c.timeout) * time.Second
 	return nil
 }
@@ -145,7 +147,7 @@ func (c *Client) Reset() *Client {
 	c.retries = 0
 	c.verifySsl = false
 	c.keepAlived = true
-	c.transport = http.Transport{}
+	c.transport = &http.Transport{}
 	return c
 }
 
@@ -160,7 +162,6 @@ func (c *Client) doReq(method string) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	resp, err := c.client.Do(req)
 	return &Response{resp}, err
 }
