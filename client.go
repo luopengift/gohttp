@@ -3,6 +3,7 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
+	"github.com/luopengift/golibs/logger"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,205 +12,100 @@ import (
 	"time"
 )
 
-type Request struct {
-	*http.Request
-}
-
-func (req *Request) SetHeader(k, v string) *Request {
-	req.Header.Add(k, v)
-	return req
-}
-
-func (req *Request) SetHeaders(kv map[string]string) *Request {
-	for k, v := range kv {
-		req.SetHeader(k, v)
-	}
-	return req
-}
-
-type Response struct {
-	*http.Response
-}
-
-func (resp *Response) Code() int {
-	return resp.StatusCode
-}
-
-func (resp *Response) Bytes() ([]byte, error) {
-	defer resp.Body.Close()
-	return ioutil.ReadAll(resp.Body)
-}
-
-func (resp *Response) String() string {
-	if response, err := resp.Bytes(); err != nil {
-		return ""
-	} else {
-		return string(response)
-	}
-
-}
-
-func NewRequest(method, urlStr string, body io.Reader) (*Request, error) {
-	req, err := http.NewRequest(method, urlStr, body)
-	return &Request{req}, err
-}
-
 type Client struct {
-	client     *http.Client
-	transport  *http.Transport
-	method     string
-	url        string
-	path       string
-	query      string
-	fragment   string
-	cookies    map[string]string
-	headers    map[string]string
-	body       interface{}
-	proxy      string
-	timeout    int
-	retries    int
-	verifySsl  bool //true:强制使用https,false:不校验https证书
-	keepAlived bool
+	*http.Client
+	*http.Transport
+	*url.URL
+	body    io.Reader
+	headers map[string]string
+	cookies map[string]string
 }
 
 func NewClient() *Client {
 	c := new(Client)
-	c.client = new(http.Client)
-	c.transport = new(http.Transport)
-	c.method = "GET"
-	c.cookies = make(map[string]string)
-	c.headers = make(map[string]string)
-	c.verifySsl = false
-	c.keepAlived = true
-	return c
-}
-
-//构造request body [interface{} -> io.Reader]
-func parseBody(v interface{}) (io.Reader, error) {
-	if v == nil {
-		return nil, nil
-	}
-	bts, err := ToBytes(v)
-	if err != nil {
-		return nil, err
-	}
-	body := bytes.NewBuffer(bts)
-	return body, nil
-}
-
-func (c *Client) newRequest() (*http.Request, error) {
-	u, err := c.newURL()
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := parseBody(c.body)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := NewRequest(c.method, u.String(), body)
-	for k, v := range c.headers {
-		req.Header.Set(k, v)
-	}
-	for k, v := range c.cookies {
-		req.AddCookie(&http.Cookie{Name: k, Value: v})
-	}
-	return req.Request, err
-}
-
-func (c *Client) setClient() error {
-	if c.proxy != "" {
-		proxy, err := url.Parse(c.proxy)
-		if err != nil {
-			return err
-		}
-		c.transport.Proxy = http.ProxyURL(proxy)
-	}
-	c.transport.DisableKeepAlives = !c.keepAlived
-	c.transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: !c.verifySsl}
-	c.client.Transport = c.transport
-	c.client.Timeout = time.Duration(c.timeout) * time.Second
-	return nil
-}
-
-func (c *Client) Reset() *Client {
-	c.method = "GET"
-	c.url = ""
-	c.path = ""
-	c.query = ""
-	c.fragment = ""
-	c.cookies = make(map[string]string)
-	c.headers = make(map[string]string)
+	c.Client = new(http.Client)
+	c.Transport = new(http.Transport)
+	c.Transport.TLSClientConfig = new(tls.Config)
+	c.Client.Transport = c.Transport
+	c.URL = new(url.URL)
 	c.body = nil
-	c.proxy = ""
-	c.timeout = 0
-	c.retries = 0
-	c.verifySsl = false
-	c.keepAlived = true
-	c.transport = &http.Transport{}
+	c.headers = make(map[string]string)
+	c.cookies = make(map[string]string)
 	return c
-}
-
-func (c *Client) doReq(method string) (*Response, error) {
-	c.method = method
-	req, err := c.newRequest()
-	if err != nil {
-		return nil, err
-	}
-
-	err = c.setClient()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := c.client.Do(req)
-	return &Response{resp}, err
 }
 
 // 长连接,Default is true
 func (c *Client) KeepAlived(used bool) *Client {
-	c.keepAlived = used
+	c.Transport.DisableKeepAlives = used
 	return c
 }
 
 // 强制使用HTTPS,Default is false
 func (c *Client) VerifySSL(used bool) *Client {
-	c.verifySsl = used
-	return c
-}
-
-func (c *Client) URL(urlstr string) *Client {
-	c.url = urlstr
-	return c
-}
-
-func (c *Client) Path(path string) *Client {
-	c.path += path
-	return c
-}
-
-func (c *Client) Query(kv map[string]string) *Client {
-	query := []string{}
-	for k, v := range kv {
-		s := k + "=" + url.QueryEscape(v)
-		query = append(query, s)
-	}
-	c.query = strings.Join(query, "&")
-	return c
-}
-
-func (c *Client) Proxy(proxy string) *Client {
-	c.proxy = proxy
+	c.Transport.TLSClientConfig.InsecureSkipVerify = !used
 	return c
 }
 
 func (c *Client) Timeout(timeout int) *Client {
-	c.timeout = timeout
+	c.Client.Timeout = time.Duration(timeout) * time.Second
 	return c
 }
 
-func (c *Client) Cookie(k, v string) *Client {
-	c.cookies[k] = v
+func (c *Client) Proxy(proxy string) *Client {
+	_proxy, err := url.Parse(proxy)
+	if err != nil {
+		logger.Error("proxy set fail:%v", err)
+		return c
+	}
+	c.Transport.Proxy = http.ProxyURL(_proxy)
+	return c
+
+}
+
+func (c *Client) Url(urlstr string) *Client {
+	u, err := url.Parse(urlstr)
+	if err != nil {
+		logger.Error("Url set fail:%v", err)
+		return c
+
+	}
+	//[scheme:][//[userinfo@]host][/]path[?query][#fragment]
+	c.URL.Scheme = u.Scheme
+	c.URL.Opaque = u.Opaque         // encoded opaque data
+	c.URL.User = u.User             // username and password information
+	c.URL.Host = u.Host             // host or host:port
+	c.URL.Path += u.Path            // path (relative paths may omit leading slash)
+	c.URL.RawPath = u.RawPath       // encoded path hint (see EscapedPath method)
+	c.URL.ForceQuery = u.ForceQuery // append a query ('?') even if RawQuery is empty
+	c.URL.RawQuery = u.RawQuery     // encoded query values, without '?
+	c.URL.Fragment = u.Fragment     // fragment for references, without '#'
+	return c
+}
+
+func (c *Client) Path(path string) *Client {
+	c.URL.Path += path
+	return c
+}
+
+func (c *Client) Query(query map[string]string) *Client {
+	q := []string{}
+	for k, v := range query {
+		q = append(q, k+"="+url.QueryEscape(v))
+	}
+	c.URL.RawQuery = strings.Join(q, "&")
+	return c
+}
+
+func (c *Client) Body(v interface{}) *Client {
+	if v == nil {
+		return c
+	}
+	bts, err := ToBytes(v)
+	if err != nil {
+		logger.Error("body set fail:%v", err)
+		return c
+	}
+	c.body = bytes.NewBuffer(bts)
 	return c
 }
 
@@ -220,41 +116,91 @@ func (c *Client) Header(k, v string) *Client {
 
 func (c *Client) Headers(kv map[string]string) *Client {
 	for k, v := range kv {
-		c.Header(k, v)
+		c.headers[k] = v
 	}
 	return c
 }
 
-func (c *Client) Body(body interface{}) *Client {
-	c.body = body
+func (c *Client) Cookie(k, v string) *Client {
+	c.cookies[k] = v
 	return c
 }
 
-func (c *Client) Retries(count int) *Client {
-	c.retries = count
-	return c
-}
+func (c *Client) doReq(method string) (*Response, error) {
 
-func (c *Client) newURL() (*url.URL, error) {
-	u, err := url.Parse(c.url)
+	req, err := http.NewRequest(method, c.URL.String(), c.body)
 	if err != nil {
-		return u, err
+		logger.Error("new request fail:%v", err)
+		return nil, err
 	}
-	if c.path != "" {
-		u.Path = c.path
+
+	for k, v := range c.headers {
+		req.Header.Add(k, v)
 	}
-	if c.query != "" {
-		u.RawQuery = c.query
+
+	for k, v := range c.cookies {
+		req.AddCookie(&http.Cookie{Name: k, Value: v})
 	}
-	return u, err
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		logger.Error("client do fail:%v", err)
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	response,err := NewResponse(resp)
+	if err != nil {
+		logger.Error("response read fail:%v", err)
+		return nil, err
+	}
+	return response, nil
+
 }
 
-func (c *Client) URLString() string {
-	url, _ := c.newURL()
-	return url.String()
+type Response struct {
+	Status     string // e.g. "200 OK"
+	StatusCode int    // e.g. 200
+	Proto      string // e.g. "HTTP/1.0"
+	ProtoMajor int    // e.g. 1
+	ProtoMinor int    // e.g. 0
+	Byte	[]byte
 }
 
-func (c *Client) Get() (*Response, error)  { return c.doReq("GET") }
+func NewResponse(resp *http.Response) (*Response,error) {
+	response := new(Response)
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+	response.Status = resp.Status
+	response.StatusCode = resp.StatusCode
+	response.Proto = resp.Proto
+	response.ProtoMajor = resp.ProtoMajor
+	response.ProtoMinor = resp.ProtoMinor
+	response.Byte = body
+	return response,nil
+}
+
+func (resp *Response) Code() int {
+        return resp.StatusCode
+}
+
+func (resp *Response) String() string {
+	return string(resp.Byte)
+}
+
+func (resp *Response) Bytes() []byte {
+	return resp.Byte
+}
+
+
+func (c *Client) Get() (*Response, error) { return c.doReq("GET") }
 func (c *Client) Post() (*Response, error) { return c.doReq("POST") }
+func (c *Client) Put() (*Response, error) { return c.doReq("PUT") }
+func (c *Client) Delete() (*Response, error) { return c.doReq("DELETE") }
 func (c *Client) Head() (*Response, error) { return c.doReq("HEAD") }
-func (c *Client) Put() (*Response, error)  { return c.doReq("PUT") }
+
+
+
