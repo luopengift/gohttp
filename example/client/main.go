@@ -12,7 +12,7 @@ func main() {
 		resp, err := client.Get()
 		fmt.Println(fmt.Sprintf("%#v", client))
 		fmt.Println(resp.Code(), err)
-		
+
 	}
 
 }

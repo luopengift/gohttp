@@ -2,12 +2,12 @@ package gohttp
 
 import (
 	"github.com/luopengift/golibs/logger"
-    "time"
-    "html/template"
+	"html/template"
 	"net/http"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 )
 
 type Handler interface {
@@ -48,24 +48,22 @@ func (ctx *HttpHandler) App() *Application {
 	return ctx.Application
 }
 
-func cookie(name, value string, expire int) *http.Cookie{
-    cookie := &http.Cookie{
-        Name:    name,
-        Value:   value,
-        Path:    "/",
-        MaxAge:  expire,
-        Expires: time.Now().Add(time.Duration(expire) * time.Second),
-    }
-    return cookie
+func cookie(name, value string, expire int) *http.Cookie {
+	cookie := &http.Cookie{
+		Name:    name,
+		Value:   value,
+		Path:    "/",
+		MaxAge:  expire,
+		Expires: time.Now().Add(time.Duration(expire) * time.Second),
+	}
+	return cookie
 }
-
 
 // set cookie for response
 func (ctx *HttpHandler) SetCookie(name, value string) {
-    cookie := cookie(name, value, 86400)
-    http.SetCookie(ctx.ResponseWriter, cookie)
+	cookie := cookie(name, value, 86400)
+	http.SetCookie(ctx.ResponseWriter, cookie)
 }
-
 
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
 	return ctx.query
@@ -154,7 +152,7 @@ func (ctx *HttpHandler) output(response []byte, code int) {
 func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 	path := filepath.Join(ctx.Config.StaticPath, tpl)
 
-    //TODO:check it twice,not a good choice
+	//TODO:check it twice,not a good choice
 	if _, ok := (*ctx.Template)[path]; !ok {
 		(*ctx.Template).AddFile(path)
 	}

@@ -39,7 +39,7 @@ func Init() *Application {
 func (app *Application) Run(addr ...string) {
 	if len(addr) != 0 {
 		app.Server.Addr = addr[0]
-	}else{
+	} else {
 		app.Server.Addr = app.Config.Addr
 	}
 	fmt.Println("HttpsServer Start", app.Server.Addr)
@@ -74,7 +74,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
 		//TODO BUG: if file is not found, log http status is 200
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
-        goto END
+		goto END
 	}
 
 	// route matching

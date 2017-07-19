@@ -84,15 +84,13 @@ func (req *request) prepare_form_arguments() {
 }
 
 func (req *request) GetCookies() []*http.Cookie {
-    return req.Request.Cookies()
+	return req.Request.Cookies()
 }
 
 func (req *request) GetCookie(name string) string {
-    cookie, err := req.Request.Cookie(name)
-    if err != nil {
-        panic(err)
-    }
-    return cookie.Value
+	cookie, err := req.Request.Cookie(name)
+	if err != nil {
+		panic(err)
+	}
+	return cookie.Value
 }
-
-

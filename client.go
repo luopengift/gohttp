@@ -150,7 +150,7 @@ func (c *Client) doReq(method string) (*Response, error) {
 
 	defer resp.Body.Close()
 
-	response,err := NewResponse(resp)
+	response, err := NewResponse(resp)
 	if err != nil {
 		logger.Error("response read fail:%v", err)
 		return nil, err
@@ -165,10 +165,10 @@ type Response struct {
 	Proto      string // e.g. "HTTP/1.0"
 	ProtoMajor int    // e.g. 1
 	ProtoMinor int    // e.g. 0
-	Byte	[]byte
+	Byte       []byte
 }
 
-func NewResponse(resp *http.Response) (*Response,error) {
+func NewResponse(resp *http.Response) (*Response, error) {
 	response := new(Response)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -180,11 +180,11 @@ func NewResponse(resp *http.Response) (*Response,error) {
 	response.ProtoMajor = resp.ProtoMajor
 	response.ProtoMinor = resp.ProtoMinor
 	response.Byte = body
-	return response,nil
+	return response, nil
 }
 
 func (resp *Response) Code() int {
-        return resp.StatusCode
+	return resp.StatusCode
 }
 
 func (resp *Response) String() string {
@@ -195,12 +195,8 @@ func (resp *Response) Bytes() []byte {
 	return resp.Byte
 }
 
-
-func (c *Client) Get() (*Response, error) { return c.doReq("GET") }
-func (c *Client) Post() (*Response, error) { return c.doReq("POST") }
-func (c *Client) Put() (*Response, error) { return c.doReq("PUT") }
+func (c *Client) Get() (*Response, error)    { return c.doReq("GET") }
+func (c *Client) Post() (*Response, error)   { return c.doReq("POST") }
+func (c *Client) Put() (*Response, error)    { return c.doReq("PUT") }
 func (c *Client) Delete() (*Response, error) { return c.doReq("DELETE") }
-func (c *Client) Head() (*Response, error) { return c.doReq("HEAD") }
-
-
-
+func (c *Client) Head() (*Response, error)   { return c.doReq("HEAD") }
