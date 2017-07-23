@@ -27,6 +27,10 @@ func NewClient() *Client {
 	c.Transport = new(http.Transport)
 	c.Transport.TLSClientConfig = new(tls.Config)
 	c.Client.Transport = c.Transport
+	return c.Reset()
+}
+
+func (c *Client) Reset() *Client {
 	c.URL = new(url.URL)
 	c.body = nil
 	c.headers = make(map[string]string)
