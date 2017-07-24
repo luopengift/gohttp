@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"github.com/luopengift/golibs/logger"
+	"github.com/luopengift/pool"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -11,6 +12,33 @@ import (
 	"strings"
 	"time"
 )
+
+type ClientPool struct {
+	*pool.Pool
+}
+
+
+func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
+	client := func() (interface{}, error) {
+		return NewClient().Reset(), nil
+	}
+	p := pool.NewPool(maxIdle, maxOpen, timeout, client)
+	return &ClientPool{Pool:p}
+}
+
+func (p *ClientPool) Get() *Client {
+	one, err := p.Pool.Get()
+	if err != nil {
+		logger.Error("Get Client error:%v",err)
+		return nil
+	}
+	return one.(*Client)
+}
+
+func (p *ClientPool) Put(c *Client) error {
+	return p.Pool.Put(c)
+}
+
 
 type Client struct {
 	*http.Client
