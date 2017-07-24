@@ -26,13 +26,13 @@ func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
 	return &ClientPool{Pool:p}
 }
 
-func (p *ClientPool) Get() *Client {
+func (p *ClientPool) Get() (*Client, error) {
 	one, err := p.Pool.Get()
 	if err != nil {
 		logger.Error("Get Client error:%v",err)
-		return nil
+		return nil,err
 	}
-	return one.(*Client)
+	return one.(*Client), nil
 }
 
 func (p *ClientPool) Put(c *Client) error {
