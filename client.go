@@ -106,7 +106,7 @@ func (c *Client) Url(urlstr string) *Client {
 	c.URL.Opaque = u.Opaque         // encoded opaque data
 	c.URL.User = u.User             // username and password information
 	c.URL.Host = u.Host             // host or host:port
-	c.URL.Path += u.Path            // path (relative paths may omit leading slash)
+	c.URL.Path = u.Path            // path (relative paths may omit leading slash)
 	c.URL.RawPath = u.RawPath       // encoded path hint (see EscapedPath method)
 	c.URL.ForceQuery = u.ForceQuery // append a query ('?') even if RawQuery is empty
 	c.URL.RawQuery = u.RawQuery     // encoded query values, without '?
@@ -115,7 +115,7 @@ func (c *Client) Url(urlstr string) *Client {
 }
 
 func (c *Client) Path(path string) *Client {
-	c.URL.Path += path
+	c.URL.Path = path
 	return c
 }
 
