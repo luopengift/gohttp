@@ -18,7 +18,7 @@ func main() {
 	pool := gohttp.NewClientPool(1,4,10)
 	for i:=0;i<=10;i++ {
 		go func() {
-			conn := pool.Get()
+			conn,_ := pool.Get()
 			resp,err := conn.Url("http://www.baidu.com").Header("Content-Type", "application/json;charset=utf-8").Get()
 			fmt.Println(fmt.Sprintf("%v,%v,%p",resp.Code(), err,conn))
 			pool.Put(conn)
