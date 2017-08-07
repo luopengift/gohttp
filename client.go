@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"github.com/luopengift/golibs/logger"
-	"github.com/luopengift/pool"
+	"github.com/luopengift/golibs/pool"
 	"io"
 	"io/ioutil"
 	"net/http"
