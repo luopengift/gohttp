@@ -3,6 +3,7 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
+	"github.com/luopengift/types"
 	"github.com/luopengift/golibs/logger"
 	"github.com/luopengift/golibs/pool"
 	"io"
@@ -132,7 +133,7 @@ func (c *Client) Body(v interface{}) *Client {
 	if v == nil {
 		return c
 	}
-	bts, err := ToBytes(v)
+	bts, err := types.ToBytes(v)
 	if err != nil {
 		logger.Error("body set fail:%v", err)
 		return c

@@ -2,6 +2,7 @@ package gohttp
 
 import (
 	"github.com/luopengift/golibs/logger"
+	"github.com/luopengift/types"
 	"html/template"
 	"net/http"
 	"os"
@@ -98,7 +99,7 @@ func (ctx *HttpHandler) GetBodyArgs() []byte {
 
 // fetch body argument named by <name>
 func (ctx *HttpHandler) GetBody(name string) interface{} {
-	if body, err := BytesToJson(ctx.body); err != nil {
+	if body, err := types.ToJSON(ctx.body); err != nil {
 		panic(err)
 	} else {
 		return body[name]
@@ -128,7 +129,7 @@ func (ctx *HttpHandler) HTTPError(error string, code int) {
 
 // If response is sent, do not sent again
 func (ctx *HttpHandler) Output(v interface{}, code ...int) {
-	response, err := ToBytes(v)
+	response, err := types.ToBytes(v)
 	if err != nil {
 		panic(err)
 	}
