@@ -8,7 +8,7 @@
 gohttp is used for RESTful APIs, Web apps, Http services in Golang.
 It is used similar with [Tornado](http://www.tornadoweb.org).
 
-### GO verion >=1.8.0
+### GO verion >=1.9
 
 ## Getting started
 
