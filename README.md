@@ -2,7 +2,7 @@
 [![BuildStatus](https://travis-ci.org/luopengift/gohttp.svg?branch=master)](https://travis-ci.org/luopengift/gohttp)
 [![GoDoc](https://godoc.org/github.com/luopengift/gohttp?status.svg)](https://godoc.org/github.com/luopengift/gohttp)
 [![GoWalker](https://gowalker.org/api/v1/badge)](https://gowalker.org/github.com/luopengift/gohttp)
-
+[![License](https://img.shields.io/badge/LICENSE-Apache2.0-ff69b4.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 ---
 
 gohttp is used for RESTful APIs, Web apps, Http services in Golang.
