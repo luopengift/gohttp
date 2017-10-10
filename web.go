@@ -99,7 +99,7 @@ func (ctx *HttpHandler) GetBodyArgs() []byte {
 
 // fetch body argument named by <name>
 func (ctx *HttpHandler) GetBody(name string) interface{} {
-	if body, err := types.ToJSON(ctx.body); err != nil {
+	if body, err := types.BytesToMap(ctx.body); err != nil {
 		panic(err)
 	} else {
 		return body[name]
