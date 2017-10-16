@@ -3,9 +3,9 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/luopengift/types"
 	"github.com/luopengift/golibs/logger"
 	"github.com/luopengift/golibs/pool"
+	"github.com/luopengift/types"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -18,20 +18,19 @@ type ClientPool struct {
 	*pool.Pool
 }
 
-
 func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
 	client := func() (interface{}, error) {
 		return NewClient().Reset(), nil
 	}
 	p := pool.NewPool(maxIdle, maxOpen, timeout, client)
-	return &ClientPool{Pool:p}
+	return &ClientPool{Pool: p}
 }
 
 func (p *ClientPool) Get() (*Client, error) {
 	one, err := p.Pool.Get()
 	if err != nil {
-		logger.Error("Get Client error:%v",err)
-		return nil,err
+		logger.Error("Get Client error:%v", err)
+		return nil, err
 	}
 	return one.(*Client), nil
 }
@@ -39,7 +38,6 @@ func (p *ClientPool) Get() (*Client, error) {
 func (p *ClientPool) Put(c *Client) error {
 	return p.Pool.Put(c)
 }
-
 
 type Client struct {
 	*http.Client
@@ -107,7 +105,7 @@ func (c *Client) Url(urlstr string) *Client {
 	c.URL.Opaque = u.Opaque         // encoded opaque data
 	c.URL.User = u.User             // username and password information
 	c.URL.Host = u.Host             // host or host:port
-	c.URL.Path = u.Path            // path (relative paths may omit leading slash)
+	c.URL.Path = u.Path             // path (relative paths may omit leading slash)
 	c.URL.RawPath = u.RawPath       // encoded path hint (see EscapedPath method)
 	c.URL.ForceQuery = u.ForceQuery // append a query ('?') even if RawQuery is empty
 	c.URL.RawQuery = u.RawQuery     // encoded query values, without '?

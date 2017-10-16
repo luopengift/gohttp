@@ -1,5 +1,5 @@
 package gohttp
 
 const (
-    VERSION = "0.1.1.101017_beta"
+	VERSION = "0.1.2.101617_beta"
 )

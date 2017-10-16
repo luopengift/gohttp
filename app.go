@@ -1,7 +1,7 @@
 //
-    /*
-        gohttp sample http server framework
-    */
+/*
+   gohttp sample http server framework
+*/
 package gohttp
 
 import (
