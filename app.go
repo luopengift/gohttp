@@ -76,7 +76,6 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 	// handler static file
 	if strings.HasPrefix(ctx.Path, "/static") || hasSuffixs(ctx.Path) {
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
-		//TODO BUG: if file is not found, log http status is 200
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		goto END
 	}
@@ -110,7 +109,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 	}
 END:
 	switch ctx.Status() {
-	case 200, 301:
+	case 200, 301, 302, 303, 304:
 		logger.Info(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 400, 401, 403, 404, 405:
 		logger.Warn(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
