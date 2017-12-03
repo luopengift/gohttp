@@ -9,6 +9,11 @@ type Config struct {
 	CertFile          string `json:"cert"`
 	KeyFile           string `json:"key"`
 	StaticPath        string `json:"static"`
+	LogFormat         string `json:'log_format'`
+}
+
+func (cfg *Config) SetLogFormat(format string) {
+	cfg.LogFormat = format
 }
 
 func (cfg *Config) SetAddress(addr string) {
@@ -36,6 +41,7 @@ func (cfg *Config) SetStaticPath(path string) {
 
 func InitConfig() *Config {
 	cfg := new(Config)
+	cfg.SetLogFormat("%3d %s %s (%s) %s")
 	cfg.SetAddress(":18081")
 	cfg.SetTimeout(30)
 	cfg.SetMaxHeaderBytes(1 << 20) //DefaultMaxHeaderBytes 1MB

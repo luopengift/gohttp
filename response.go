@@ -53,8 +53,8 @@ func (resp *response) Write(b []byte) (int, error) {
 
 // rewrite http.ResponseWriter interface method
 func (resp *response) WriteHeader(code int) {
-	resp.ResponseWriter.WriteHeader(code)
 	resp.status = code
+	resp.ResponseWriter.WriteHeader(code)
 }
 
 func (resp *response) SetCode(code int) {

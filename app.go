@@ -1,4 +1,3 @@
-//
 /*
    gohttp sample http server framework
 */
@@ -60,21 +59,18 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 func (app *Application) handler(responsewriter http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
 
-	// LOG Format
-	format := "%3d %s %s (%s) %s"
-
 	// init a new http handler
 	ctx := NewHttpHandler(app, responsewriter, request)
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			logger.Error(format+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
+			logger.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
 
 	// handler static file
-	if strings.HasPrefix(ctx.Path, "/static") || hasSuffixs(ctx.Path) {
+	if strings.HasPrefix(ctx.Path, "/static") || hasSuffixs(ctx.Path, ".ico") {
 		file := filepath.Join(ctx.Config.StaticPath, ctx.Path)
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		goto END
@@ -110,12 +106,12 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 END:
 	switch ctx.Status() {
 	case 200, 301, 302, 303, 304:
-		logger.Info(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 400, 401, 403, 404, 405:
-		logger.Warn(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 500, 501, 502, 503:
-		logger.Error(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	default:
-		logger.Error(format, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		logger.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
 }
