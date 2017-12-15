@@ -179,8 +179,6 @@ func (c *Client) doReq(method string) (*Response, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
-
 	response, err := NewResponse(resp)
 	if err != nil {
 		logger.Error("response read fail:%v", err)
@@ -205,6 +203,7 @@ func NewResponse(resp *http.Response) (*Response, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	response.Status = resp.Status
 	response.StatusCode = resp.StatusCode
 	response.Proto = resp.Proto
