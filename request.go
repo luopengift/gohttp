@@ -53,9 +53,9 @@ func (req *request) parse_arguments(match map[string]string) {
 	req.prepare_query_arguments()
 	req.prepare_body_arguments()
 	req.prepare_form_arguments()
-	//logger.Debug("header:%#v", req.Request.Header)
-	//logger.Debug("match:%#v,query:%#v,body:%#v", req.match, req.query, req.body)
-	//logger.Debug("PostForm:%#v,MultipartForm:%#v", req.Request.PostForm, req.Request.MultipartForm)
+	//log.Debug("header:%#v", req.Request.Header)
+	//log.Debug("match:%#v,query:%#v,body:%#v", req.match, req.query, req.body)
+	//log.Debug("PostForm:%#v,MultipartForm:%#v", req.Request.PostForm, req.Request.MultipartForm)
 }
 
 // prepare match and assignment to match arguments

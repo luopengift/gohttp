@@ -3,8 +3,8 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
-	"github.com/luopengift/golibs/logger"
 	"github.com/luopengift/golibs/pool"
+	"github.com/luopengift/log"
 	"github.com/luopengift/types"
 	"io"
 	"io/ioutil"
@@ -29,7 +29,7 @@ func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
 func (p *ClientPool) Get() (*Client, error) {
 	one, err := p.Pool.Get()
 	if err != nil {
-		logger.Error("Get Client error:%v", err)
+		log.Error("Get Client error:%v", err)
 		return nil, err
 	}
 	return one.(*Client), nil
@@ -85,7 +85,7 @@ func (c *Client) Timeout(timeout int) *Client {
 func (c *Client) Proxy(proxy string) *Client {
 	_proxy, err := url.Parse(proxy)
 	if err != nil {
-		logger.Error("proxy set fail:%v", err)
+		log.Error("proxy set fail:%v", err)
 		return c
 	}
 	c.Transport.Proxy = http.ProxyURL(_proxy)
@@ -96,7 +96,7 @@ func (c *Client) Proxy(proxy string) *Client {
 func (c *Client) Url(urlstr string) *Client {
 	u, err := url.Parse(urlstr)
 	if err != nil {
-		logger.Error("Url set fail:%v", err)
+		log.Error("Url set fail:%v", err)
 		return c
 
 	}
@@ -133,7 +133,7 @@ func (c *Client) Body(v interface{}) *Client {
 	}
 	bts, err := types.ToBytes(v)
 	if err != nil {
-		logger.Error("body set fail:%v", err)
+		log.Error("body set fail:%v", err)
 		return c
 	}
 	c.body = bytes.NewBuffer(bts)
@@ -161,7 +161,7 @@ func (c *Client) doReq(method string) (*Response, error) {
 
 	req, err := http.NewRequest(method, c.URL.String(), c.body)
 	if err != nil {
-		logger.Error("new request fail:%v", err)
+		log.Error("new request fail:%v", err)
 		return nil, err
 	}
 
@@ -175,13 +175,13 @@ func (c *Client) doReq(method string) (*Response, error) {
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		logger.Error("client do fail:%v", err)
+		log.Error("client do fail:%v", err)
 		return nil, err
 	}
 
 	response, err := NewResponse(resp)
 	if err != nil {
-		logger.Error("response read fail:%v", err)
+		log.Error("response read fail:%v", err)
 		return nil, err
 	}
 	return response, nil

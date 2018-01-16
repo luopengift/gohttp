@@ -5,7 +5,7 @@ package gohttp
 
 import (
 	"fmt"
-	"github.com/luopengift/golibs/logger"
+	"github.com/luopengift/log"
 	"net/http"
 	"path/filepath"
 	"reflect"
@@ -26,6 +26,7 @@ func Init() *Application {
 	app.Config = InitConfig()
 	app.Template = InitTemplate()
 	app.RouterList = InitRouterList()
+	app.Route("^/_routeList$", &RouteHandler{})
 	app.Server = &http.Server{
 		Addr: app.Config.Addr,
 		/** control how to handler ServeHTTP*/
@@ -65,7 +66,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			logger.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
+			log.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
 
@@ -106,12 +107,12 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 END:
 	switch ctx.Status() {
 	case 200, 301, 302, 303, 304:
-		logger.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		log.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 400, 401, 403, 404, 405:
-		logger.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		log.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 500, 501, 502, 503:
-		logger.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		log.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	default:
-		logger.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		log.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
 }
