@@ -36,8 +36,12 @@ func (cfg *Config) SetSSL(cert, key string) {
 	cfg.KeyFile = key
 }
 
-func (cfg *Config) SetStaticPath(path string) {
-	cfg.StaticPath = path
+func (cfg *Config) SetWebPath(web string) {
+	cfg.WebPath = web
+}
+
+func (cfg *Config) SetStaticPath(static string) {
+	cfg.StaticPath = static
 }
 
 func InitConfig() *Config {

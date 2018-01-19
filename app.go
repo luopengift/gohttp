@@ -4,6 +4,7 @@
 package gohttp
 
 import (
+	"strings"
 	"fmt"
 	"github.com/luopengift/log"
 	"net/http"
@@ -70,7 +71,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 	}()
 
 	// handler static file
-	if hasPrefixs(ctx.Path, "/static", ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
+	if strings.HasPrefix(ctx.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.Path)
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		goto END
