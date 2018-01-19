@@ -8,7 +8,8 @@ type Config struct {
 	MaxHeaderBytes    int    `json:"maxheaderbytes"`
 	CertFile          string `json:"cert"`
 	KeyFile           string `json:"key"`
-	StaticPath        string `json:"static"`
+	WebPath           string `json:"web_path"`
+	StaticPath        string `json:"static_path"`
 	LogFormat         string `json:'log_format'`
 }
 

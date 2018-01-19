@@ -13,3 +13,12 @@ func hasSuffixs(s string, suffixs ...string) bool {
 	}
 	return false
 }
+
+func hasPrefixs(s string, prefixs ...string) bool {
+	for _, prefix := range prefixs {
+		if ok := strings.HasPrefix(s, prefix); ok {
+			return true
+		}
+	}
+	return false
+}
