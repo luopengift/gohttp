@@ -10,7 +10,7 @@ type Config struct {
 	KeyFile           string `json:"key"`
 	WebPath           string `json:"web_path"`
 	StaticPath        string `json:"static_path"`
-	LogFormat         string `json:'log_format'`
+	LogFormat         string `json:"log_format"`
 }
 
 func (cfg *Config) SetLogFormat(format string) {
