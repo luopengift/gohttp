@@ -11,9 +11,15 @@ import (
 	"time"
 )
 
+// Handler implements http handler interface.
+// Prepare -> Init -> GET/POST... -> Finish
 type Handler interface {
 	http.Handler
+	// Prepare invoked before Init.
 	Prepare()
+	// Init invoked before httpMethod func.
+	Init()
+	// Finish invoked after httpMethod func.
 	Finish()
 	parse_arguments(match map[string]string)
 	init(*Application, http.ResponseWriter, *http.Request)
@@ -127,8 +133,12 @@ func (ctx *HttpHandler) HTTPError(error string, code int) {
 
 }
 
-// If response is sent, do not sent again
+// Output response the http request. If response is sent, do not sent again.
 func (ctx *HttpHandler) Output(v interface{}, code ...int) {
+	if ctx.Finished() {
+
+		return
+	}
 	response, err := types.ToBytes(v)
 	if err != nil {
 		panic(err)
@@ -201,4 +211,5 @@ func (ctx *HttpHandler) Download(file string) {
 }
 
 func (ctx *HttpHandler) Prepare() {}
+func (ctx *HttpHandler) Init()    {}
 func (ctx *HttpHandler) Finish()  {}

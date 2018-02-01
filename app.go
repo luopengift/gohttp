@@ -4,16 +4,17 @@
 package gohttp
 
 import (
-	"strings"
 	"fmt"
 	"github.com/luopengift/log"
 	"net/http"
 	"path/filepath"
 	"reflect"
 	"runtime/debug"
+	"strings"
 	"time"
 )
 
+// Aplllication is a httpserver instance.
 type Application struct {
 	*Config
 	*Template
@@ -21,6 +22,7 @@ type Application struct {
 	*http.Server
 }
 
+// Init creates a default httpserver instance by default config.
 func Init() *Application {
 	app := new(Application)
 	app.Config = InitConfig()
@@ -40,6 +42,7 @@ func Init() *Application {
 	return app
 }
 
+// Run starts the server by listen address.
 func (app *Application) Run(addr ...string) {
 	if len(addr) != 0 {
 		app.Server.Addr = addr[0]
@@ -89,12 +92,20 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		}
 		exec.init(app, ctx.ResponseWriter, ctx.Request)
 		exec.parse_arguments(match)
+
 		exec.Prepare()
 
 		// check if status is not default value 0, knows prepare is finished handler
 		if ctx.Finished() {
 			goto END //Finished
 		}
+
+		exec.Init()
+		// check if status is not default value 0, knows prepare is finished handler
+		if ctx.Finished() {
+			goto END //Finished
+		}
+
 		if method := handle.MethodByName(ctx.Method); bool(method == reflect.Value{}) {
 			ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 			goto END //405

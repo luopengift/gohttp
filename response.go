@@ -57,10 +57,6 @@ func (resp *response) WriteHeader(code int) {
 	resp.ResponseWriter.WriteHeader(code)
 }
 
-func (resp *response) SetCode(code int) {
-	resp.status = code
-}
-
 func (resp *response) Status() int {
 	return resp.status
 }
