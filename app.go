@@ -100,7 +100,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 			goto END //Finished
 		}
 
-		exec.Init()
+		exec.Auth()
 		// check if status is not default value 0, knows prepare is finished handler
 		if ctx.Finished() {
 			goto END //Finished

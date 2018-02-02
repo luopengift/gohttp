@@ -12,13 +12,13 @@ import (
 )
 
 // Handler implements http handler interface.
-// Prepare -> Init -> GET/POST... -> Finish
+// Prepare -> Auth -> GET/POST... -> Finish
 type Handler interface {
 	http.Handler
 	// Prepare invoked before Init.
 	Prepare()
-	// Init invoked before httpMethod func.
-	Init()
+	// Auth invoked before httpMethod func.
+	Auth()
 	// Finish invoked after httpMethod func.
 	Finish()
 	parse_arguments(match map[string]string)
@@ -211,5 +211,5 @@ func (ctx *HttpHandler) Download(file string) {
 }
 
 func (ctx *HttpHandler) Prepare() {}
-func (ctx *HttpHandler) Init()    {}
+func (ctx *HttpHandler) Auth()    {}
 func (ctx *HttpHandler) Finish()  {}
