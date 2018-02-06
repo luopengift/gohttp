@@ -17,8 +17,8 @@ type Handler interface {
 	http.Handler
 	// Prepare invoked before Init.
 	Prepare()
-	// Auth invoked before httpMethod func.
-	Auth()
+	// Initialize invoked before httpMethod func.
+	Initialize()
 	// Finish invoked after httpMethod func.
 	Finish()
 	parse_arguments(match map[string]string)
@@ -210,6 +210,6 @@ func (ctx *HttpHandler) Download(file string) {
 	return
 }
 
-func (ctx *HttpHandler) Prepare() {}
-func (ctx *HttpHandler) Auth()    {}
-func (ctx *HttpHandler) Finish()  {}
+func (ctx *HttpHandler) Prepare()    {}
+func (ctx *HttpHandler) Initialize() {}
+func (ctx *HttpHandler) Finish()     {}
