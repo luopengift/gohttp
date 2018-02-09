@@ -119,7 +119,7 @@ func (ctx *HttpHandler) GetForm(name string) string {
 
 // response redirect
 func (ctx *HttpHandler) Redirect(url string, code int) {
-	ctx.WriteHeader(code)
+	//ctx.ResponseWriter.status = code
 	http.Redirect(ctx.ResponseWriter, ctx.Request, url, code)
 }
 
