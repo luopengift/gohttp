@@ -21,14 +21,6 @@ type Application struct {
 	*RouterList
 	*http.Server
 }
-// InitLog inits gohttp loghandler
-func InitLog() *log.Log {
-	fileHandler := log.NewFile("/tmp/access_%Y%M%D.log")
-	gohttpLog := log.NewLog("gohttp", fileHandler)
-	gohttpLog.SetFormatter(log.NewTextFormat("TIME [LEVEL] MESSAGE", 0))
-	return gohttpLog
-}
-
 
 // Init creates a default httpserver instance by default config.
 func Init() *Application {
@@ -125,12 +117,12 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		}
 	}
 END:
-	switch ctx.Status() {
-	case 200, 301, 302, 303, 304:
+	switch ctx.Status() / 100 {
+	case 2, 3:
 		ctx.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	case 400, 401, 403, 404, 405:
+	case 4:
 		ctx.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	case 500, 501, 502, 503:
+	case 5:
 		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	default:
 		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))

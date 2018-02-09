@@ -124,11 +124,11 @@ func (ctx *HttpHandler) Redirect(url string, code int) {
 }
 
 // response Http Error
-func (ctx *HttpHandler) HTTPError(error string, code int) {
+func (ctx *HttpHandler) HTTPError(msg string, code int) {
 
 	ctx.ResponseWriter.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	ctx.ResponseWriter.Header().Set("X-Content-Type-Options", "nosniff")
-	ctx.output([]byte(error), code)
+	ctx.output([]byte(msg), code)
 
 }
 
