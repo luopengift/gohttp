@@ -1,7 +1,6 @@
 package gohttp
 
 import (
-	"github.com/luopengift/golibs/logger"
 	"github.com/luopengift/types"
 	"html/template"
 	"net/http"
@@ -188,7 +187,7 @@ func (ctx *HttpHandler) render(tpl *template.Template, data interface{}) {
 // file download response by file path.
 func (ctx *HttpHandler) Download(file string) {
 	if ctx.Finished() {
-		logger.Error("HttpHandler is end!")
+		ctx.Error("HttpHandler is end!")
 		return
 	}
 	f, err := os.Stat(file)

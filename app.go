@@ -4,7 +4,6 @@
 package gohttp
 
 import (
-	"fmt"
 	"github.com/luopengift/log"
 	"net/http"
 	"path/filepath"
@@ -17,15 +16,25 @@ import (
 // Aplllication is a httpserver instance.
 type Application struct {
 	*Config
+	*log.Log
 	*Template
 	*RouterList
 	*http.Server
 }
+// InitLog inits gohttp loghandler
+func InitLog() *log.Log {
+	fileHandler := log.NewFile("/tmp/access_%Y%M%D.log")
+	gohttpLog := log.NewLog("gohttp", fileHandler)
+	gohttpLog.SetFormatter(log.NewTextFormat("TIME [LEVEL] MESSAGE", 0))
+	return gohttpLog
+}
+
 
 // Init creates a default httpserver instance by default config.
 func Init() *Application {
 	app := new(Application)
 	app.Config = InitConfig()
+	app.Log = InitLog()
 	app.Template = InitTemplate()
 	app.RouterList = InitRouterList()
 	app.Route("^/_routeList$", &RouteHandler{})
@@ -49,7 +58,7 @@ func (app *Application) Run(addr ...string) {
 	} else {
 		app.Server.Addr = app.Config.Addr
 	}
-	fmt.Println("HttpsServer Start", app.Server.Addr)
+	app.Info("HttpsServer Start %s", app.Server.Addr)
 	if err := app.Server.ListenAndServe(); err != nil {
 		panic(err)
 	}
@@ -69,7 +78,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			log.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
+			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
 
@@ -118,12 +127,12 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 END:
 	switch ctx.Status() {
 	case 200, 301, 302, 303, 304:
-		log.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		ctx.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 400, 401, 403, 404, 405:
-		log.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		ctx.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	case 500, 501, 502, 503:
-		log.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	default:
-		log.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
+		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
 }
