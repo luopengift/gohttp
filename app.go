@@ -94,14 +94,13 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 		exec.init(app, ctx.ResponseWriter, ctx.Request)
 		exec.parse_arguments(match)
 
-		exec.Prepare()
-
+		exec.Initialize()
 		// check if status is not default value 0, knows prepare is finished handler
 		if ctx.Finished() {
 			goto END //Finished
 		}
 
-		exec.Initialize()
+		exec.Prepare()
 		// check if status is not default value 0, knows prepare is finished handler
 		if ctx.Finished() {
 			goto END //Finished
