@@ -12,6 +12,11 @@ type ApiOutput struct {
 	Data interface{} `json:"data"`
 }
 
+func (api *ApiOutput) Set(code int, msg string) {
+	api.Code = code
+	api.Msg = msg
+}
+
 func (api *ApiOutput) Error() string {
 	return fmt.Sprintf("%d: %s", api.Code, api.Msg)
 }
