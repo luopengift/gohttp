@@ -1,6 +1,8 @@
 package gohttp
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 )
 
@@ -10,6 +12,23 @@ type ApiOutput struct {
 	Msg  string      `json:"msg"`
 	Err  error       `json:"err"`
 	Data interface{} `json:"data"`
+}
+
+// MarshalJSON rewrite format to json, implement json.Marshaler interface.
+func (api ApiOutput) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	buf.WriteByte('{')
+	fmt.Fprintf(&buf, `"code":"%d",`, api.Code)
+	fmt.Fprintf(&buf, `"msg":"%s",`, api.Msg)
+	fmt.Fprintf(&buf, `"err":"%s",`, api.Err)
+	fmt.Fprintf(&buf, `"data":`)
+	b, err := json.Marshal(api.Data)
+	if err != nil {
+		return nil, err
+	}
+	_, err = buf.Write(b)
+	buf.WriteByte('}')
+	return buf.Bytes(), err
 }
 
 func (api *ApiOutput) Set(code int, msg string) {
