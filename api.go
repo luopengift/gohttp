@@ -18,9 +18,9 @@ type ApiOutput struct {
 func (api ApiOutput) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	buf.WriteByte('{')
-	fmt.Fprintf(&buf, `"code":"%d",`, api.Code)
+	fmt.Fprintf(&buf, `"code":%d,`, api.Code)
 	fmt.Fprintf(&buf, `"msg":"%s",`, api.Msg)
-	fmt.Fprintf(&buf, `"err":"%s",`, api.Err)
+	fmt.Fprintf(&buf, `"err":"%v",`, api.Err)
 	fmt.Fprintf(&buf, `"data":`)
 	b, err := json.Marshal(api.Data)
 	if err != nil {
