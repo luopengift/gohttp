@@ -18,10 +18,18 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 * Simple Client Application: [client](https://github.com/luopengift/gohttp/blob/master/example/client/main.go)
 
 #### Download and Install
-* go get github.com/luopengift/gohttp
+```
+go get github.com/luopengift/gohttp
+```
 
+#### Generate https tls
+```
+go run  $GOROOT/src/crypto/tls/generate_cert.go --host localhost
+```
 #### Run
-* go run  $GOPATH/src/github.com/luopengift/gohttp/sample/server.go
+```
+go run  $GOPATH/src/github.com/luopengift/gohttp/sample/server.go
+```
 
 ## Contributing
 

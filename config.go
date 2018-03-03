@@ -31,7 +31,7 @@ func (cfg *Config) SetMaxHeaderBytes(max int) {
 	cfg.MaxHeaderBytes = max
 }
 
-func (cfg *Config) SetSSL(cert, key string) {
+func (cfg *Config) SetTLS(cert, key string) {
 	cfg.CertFile = cert
 	cfg.KeyFile = key
 }

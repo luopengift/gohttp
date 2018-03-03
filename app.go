@@ -4,6 +4,7 @@
 package gohttp
 
 import (
+	"context"
 	"github.com/luopengift/log"
 	"net/http"
 	"path/filepath"
@@ -50,10 +51,22 @@ func (app *Application) Run(addr ...string) {
 	} else {
 		app.Server.Addr = app.Config.Addr
 	}
-	app.Info("HttpsServer Start %s", app.Server.Addr)
-	if err := app.Server.ListenAndServe(); err != nil {
-		panic(err)
+	if app.Config.CertFile != "" && app.Config.KeyFile != "" {
+		app.Info("Https start %s", app.Server.Addr)
+		if err := app.Server.ListenAndServeTLS(app.Config.CertFile, app.Config.KeyFile); err != nil {
+			panic(err)
+		}
+	} else {
+		app.Info("Http start %s", app.Server.Addr)
+		if err := app.Server.ListenAndServe(); err != nil {
+			panic(err)
+		}
 	}
+}
+
+// Stop gracefully shuts down the server without interrupting any active connections.
+func (app *Application) Stop() error {
+	return app.Server.Shutdown(context.Background())
 }
 
 // ServeHTTP is HTTP server implement method. It makes App compatible to native http handler.
