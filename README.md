@@ -22,7 +22,7 @@ It is used similar with [Tornado](http://www.tornadoweb.org).
 go get github.com/luopengift/gohttp
 ```
 
-#### Generate https tls
+#### Generate https tls cert/key file
 ```
 go run  $GOROOT/src/crypto/tls/generate_cert.go --host localhost
 ```
