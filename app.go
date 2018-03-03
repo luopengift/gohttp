@@ -6,6 +6,7 @@ package gohttp
 import (
 	"context"
 	"github.com/luopengift/log"
+	"golang.org/x/net/http2"
 	"net/http"
 	"path/filepath"
 	"reflect"
@@ -31,6 +32,7 @@ func Init() *Application {
 	app.Template = InitTemplate()
 	app.RouterList = InitRouterList()
 	app.Route("^/_routeList$", &RouteHandler{})
+	app.Route("^/_info$", &InfoHandler{})
 	app.Server = &http.Server{
 		Addr: app.Config.Addr,
 		/** control how to handler ServeHTTP*/
@@ -41,10 +43,18 @@ func Init() *Application {
 		WriteTimeout:      time.Duration(app.Config.WriteTimeout) * time.Second,
 		MaxHeaderBytes:    app.Config.MaxHeaderBytes,
 	}
+	serverHttp2 := &http2.Server{
+		IdleTimeout: 1 * time.Minute,
+	}
+	if err := http2.ConfigureServer(app.Server, serverHttp2); err != nil {
+		app.Error("%v", err)
+	}
 	return app
 }
 
 // Run starts the server by listen address.
+// HTTP/2.0 is only supported in https,
+// If server is http mode, then HTTP/1.x will be used.
 func (app *Application) Run(addr ...string) {
 	if len(addr) != 0 {
 		app.Server.Addr = addr[0]
