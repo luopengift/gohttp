@@ -13,6 +13,8 @@ type request struct {
 	// request method
 	Method string
 
+	Proto string
+
 	// request url
 	URL string
 
@@ -34,6 +36,7 @@ func NewRequestReader(req *http.Request) *request {
 	r := new(request)
 	r.Request = req
 	r.Method = req.Method
+	r.Proto = req.Proto
 	r.URL = req.RequestURI
 	r.Remote = strings.Split(req.RemoteAddr, ":")[0]
 	r.Path = req.URL.Path
