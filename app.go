@@ -74,7 +74,7 @@ func (app *Application) Run(addr ...string) {
 	}
 }
 
-func (app *Application) RunHttp(addrs ...string) {
+func (app *Application) RunHttp(addr ...string) {
 	if len(addr) != 0 {
 		app.Server.Addr = addr[0]
 	} else {
@@ -86,7 +86,7 @@ func (app *Application) RunHttp(addrs ...string) {
 	}
 }
 
-func (app *Application) RunHttps(addrs ...string) {
+func (app *Application) RunHttps(addr ...string) {
 	if len(addr) != 0 {
 		app.Server.Addr = addr[0]
 	} else {
