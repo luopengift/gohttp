@@ -74,6 +74,30 @@ func (app *Application) Run(addr ...string) {
 	}
 }
 
+func (app *Application) RunHttp(addrs ...string) {
+	if len(addr) != 0 {
+		app.Server.Addr = addr[0]
+	} else {
+		app.Server.Addr = app.Config.Addr
+	}
+	app.Info("Http start %s", app.Server.Addr)
+	if err := app.Server.ListenAndServe(); err != nil {
+		panic(err)
+	}
+}
+
+func (app *Application) RunHttps(addrs ...string) {
+	if len(addr) != 0 {
+		app.Server.Addr = addr[0]
+	} else {
+		app.Server.Addr = app.Config.Addr
+	}
+	app.Info("Https start %s", app.Server.Addr)
+	if err := app.Server.ListenAndServeTLS(app.Config.CertFile, app.Config.KeyFile); err != nil {
+		panic(err)
+	}
+}
+
 // Stop gracefully shuts down the server without interrupting any active connections.
 func (app *Application) Stop() error {
 	return app.Server.Shutdown(context.Background())
