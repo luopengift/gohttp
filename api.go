@@ -33,7 +33,7 @@ func (api ApiOutput) MarshalJSON() ([]byte, error) {
 
 	bytes := buf.Bytes()
 	for index, char := range bytes {
-		if char == '\t' || char == '\n' || char == '\r' || char > '~' || char < ' ' {
+		if char == '\t' || char == '\n' || char == '\r' {
 			bytes[index] = ' '
 		}
 	}
