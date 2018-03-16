@@ -31,12 +31,13 @@ func (api ApiOutput) MarshalJSON() ([]byte, error) {
 
 	buf.WriteByte('}')
 
-	for index, char := range buf.Bytes() {
+	bytes := buf.Bytes()
+	for index, char := range bytes {
 		if char == '\t' || char == '\n' || char == '\r' || char > '~' || char < ' ' {
-			buf.Bytes()[index] = ' '
+			bytes[index] = ' '
 		}
 	}
-	return buf.Bytes(), err
+	return bytes, err
 }
 
 func (api *ApiOutput) Set(code int, msg string) {
