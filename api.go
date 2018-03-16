@@ -21,13 +21,21 @@ func (api ApiOutput) MarshalJSON() ([]byte, error) {
 	fmt.Fprintf(&buf, `"code":%d,`, api.Code)
 	fmt.Fprintf(&buf, `"msg":"%s",`, api.Msg)
 	fmt.Fprintf(&buf, `"err":"%v",`, api.Err)
+
 	fmt.Fprintf(&buf, `"data":`)
 	b, err := json.Marshal(api.Data)
 	if err != nil {
 		return nil, err
 	}
 	_, err = buf.Write(b)
+
 	buf.WriteByte('}')
+
+	for index, char := range buf.Bytes() {
+		if char == '\t' || char == '\n' || char == '\r' || char > '~' || char < ' ' {
+			buf.Bytes()[index] = ' '
+		}
+	}
 	return buf.Bytes(), err
 }
 
