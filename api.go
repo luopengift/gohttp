@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 )
 
 // ApiOutput is sturct data need responsed.
@@ -20,8 +21,7 @@ func (api ApiOutput) MarshalJSON() ([]byte, error) {
 	buf.WriteByte('{')
 	fmt.Fprintf(&buf, `"code":%d,`, api.Code)
 	fmt.Fprintf(&buf, `"msg":"%s",`, api.Msg)
-	fmt.Fprintf(&buf, `"err":"%v",`, api.Err)
-
+	fmt.Fprintf(&buf, `"err":"%v",`, strings.Replace(fmt.Sprintf("%v", api.Err), "\"", " ", -1))
 	fmt.Fprintf(&buf, `"data":`)
 	b, err := json.Marshal(api.Data)
 	if err != nil {
