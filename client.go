@@ -3,6 +3,7 @@ package gohttp
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/base64"
 	"github.com/luopengift/golibs/pool"
 	"github.com/luopengift/log"
 	"github.com/luopengift/types"
@@ -154,6 +155,12 @@ func (c *Client) Headers(kv map[string]string) *Client {
 
 func (c *Client) Cookie(k, v string) *Client {
 	c.cookies[k] = v
+	return c
+}
+
+func (c *Client) BaseAuth(user, pass string) *Client {
+	s := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
+	c.Header("Authorization", "Basic "+s)
 	return c
 }
 
