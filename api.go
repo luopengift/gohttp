@@ -64,6 +64,7 @@ type ApiHandler struct {
 }
 
 func (ctx *ApiHandler) Finish() {
+	ctx.ResponseWriter.Header().Set("Content-Type", "application/json; charset=utf-8")
 	ctx.Output(ctx.ApiOutput)
 }
 
