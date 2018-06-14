@@ -129,8 +129,8 @@ func (ctx *HttpHandler) RecvFile(name string, path string) error {
 		return err
 	}
 	defer f.Close()
-	io.Copy(f, file)
-	return nil
+	_, err = io.Copy(f, file)
+	return err
 }
 
 // response redirect
