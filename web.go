@@ -3,6 +3,8 @@ package gohttp
 import (
 	"github.com/luopengift/types"
 	"html/template"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path"
@@ -72,12 +74,12 @@ func (ctx *HttpHandler) SetCookie(name, value string) {
 }
 
 func (ctx *HttpHandler) GetQueryArgs() map[string][]string {
-	return ctx.query
+	return ctx.Request.Form
 }
 
 // fetch query argument named by <name>, null is default value defined by user
 func (ctx *HttpHandler) GetQuery(name string, null string) string {
-	if value, ok := ctx.query[name]; !ok {
+	if value, ok := ctx.Request.Form[name]; !ok {
 		return null
 	} else {
 		return value[0]
@@ -99,22 +101,36 @@ func (ctx *HttpHandler) GetMatch(name string, null string) string {
 
 // fetch body arguments
 func (ctx *HttpHandler) GetBodyArgs() []byte {
-	return ctx.body
+	body, err := ioutil.ReadAll(ctx.Request.Body)
+	if err != nil {
+		panic(err)
+	}
+	return body
 }
 
 // fetch body argument named by <name>
 func (ctx *HttpHandler) GetBody(name string) interface{} {
-	if body, err := types.BytesToMap(ctx.body); err != nil {
+	bodyArgs := ctx.GetBodyArgs()
+	if body, err := types.BytesToMap(bodyArgs); err != nil {
 		panic(err)
 	} else {
 		return body[name]
 	}
 }
 
-// fetch form argument named by <name>
-func (ctx *HttpHandler) GetForm(name string) string {
-	//TODO
-	return ""
+func (ctx *HttpHandler) RecvFile(name string, path string) error {
+	file, head, err := ctx.Request.FormFile(name)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	f, err := os.OpenFile(filepath.Join(path, head.Filename), os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	io.Copy(f, file)
+	return nil
 }
 
 // response redirect

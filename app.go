@@ -55,27 +55,8 @@ func Init() *Application {
 // Run starts the server by listen address.
 // HTTP/2.0 is only supported in https,
 // If server is http mode, then HTTP/1.x will be used.
-func (app *Application) Run(addr ...string) {
-	if len(addr) != 0 {
-		app.Server.Addr = addr[0]
-	} else {
-		app.Server.Addr = app.Config.Addr
-	}
-	if app.Config.CertFile != "" && app.Config.KeyFile != "" {
-		app.Info("Https start %s", app.Server.Addr)
-		if err := app.Server.ListenAndServeTLS(app.Config.CertFile, app.Config.KeyFile); err != nil {
-			panic(err)
-		}
-	} else {
-		app.Info("Http start %s", app.Server.Addr)
-		if err := app.Server.ListenAndServe(); err != nil {
-			panic(err)
-		}
-	}
-}
-
 func (app *Application) RunHttp(addr ...string) {
-	if len(addr) != 0 {
+	if len(addr) == 1 {
 		app.Server.Addr = addr[0]
 	} else {
 		app.Server.Addr = app.Config.Addr
@@ -87,7 +68,7 @@ func (app *Application) RunHttp(addr ...string) {
 }
 
 func (app *Application) RunHttps(addr ...string) {
-	if len(addr) != 0 {
+	if len(addr) == 1 {
 		app.Server.Addr = addr[0]
 	} else {
 		app.Server.Addr = app.Config.Addr
