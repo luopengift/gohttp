@@ -105,13 +105,17 @@ func (ctx *HttpHandler) GetBodyArgs() []byte {
 	if err != nil {
 		panic(err)
 	}
-	return body
+	if len(body) != 0 {
+		ctx.body = body
+
+	}
+	return ctx.body
 }
 
 // fetch body argument named by <name>
 func (ctx *HttpHandler) GetBody(name string) interface{} {
-	bodyArgs := ctx.GetBodyArgs()
-	if body, err := types.BytesToMap(bodyArgs); err != nil {
+	ctx.GetBodyArgs()
+	if body, err := types.BytesToMap(ctx.body); err != nil {
 		panic(err)
 	} else {
 		return body[name]

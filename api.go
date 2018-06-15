@@ -57,7 +57,7 @@ func (api *ApiOutput) Detail() string {
 	return fmt.Sprintf("%d: %s\n%s\n%v", api.Code, api.Msg, api.Err.Error(), api.Data)
 }
 
-// ApiHandler designed for http api. It can used easy.
+// ApiHandler designed for http api. It can used easily.
 type ApiHandler struct {
 	ApiOutput
 	HttpHandler

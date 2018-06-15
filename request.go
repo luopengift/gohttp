@@ -24,6 +24,7 @@ type request struct {
 	Path string
 	// request path regx match arguments
 	match map[string]string
+	body  []byte
 }
 
 func NewRequestReader(req *http.Request) *request {
