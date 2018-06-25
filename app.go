@@ -86,14 +86,10 @@ func (app *Application) Stop() error {
 
 // ServeHTTP is HTTP server implement method. It makes App compatible to native http handler.
 func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
-	app.handler(responsewriter, request)
-}
-
-func (app *Application) handler(responsewriter http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
-
 	// init a new http handler
 	ctx := NewHttpHandler(app, responsewriter, request)
+
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
@@ -101,49 +97,7 @@ func (app *Application) handler(responsewriter http.ResponseWriter, request *htt
 			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
-
-	// handler static file
-	if strings.HasPrefix(ctx.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
-		file := filepath.Join(ctx.Config.WebPath, ctx.Path)
-		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
-		goto END
-	}
-
-	// route matching
-	if entry, match := app.Find(ctx.Path); entry == nil {
-		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
-		goto END //404
-	} else {
-		handle := reflect.New(entry)
-		exec, ok := handle.Interface().(Handler)
-		if !ok {
-			panic("exec is not Handler")
-		}
-		exec.init(app, ctx.ResponseWriter, ctx.Request)
-		exec.parse_arguments(match)
-
-		exec.Initialize()
-		// check if status is not default value 0, knows prepare is finished handler
-		if ctx.Finished() {
-			goto END //Finished
-		}
-
-		exec.Prepare()
-		// check if status is not default value 0, knows prepare is finished handler
-		if ctx.Finished() {
-			goto END //Finished
-		}
-
-		if method := handle.MethodByName(ctx.Method); bool(method == reflect.Value{}) {
-			ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-			goto END //405
-		} else {
-			method.Call(nil)
-			exec.Finish()
-			goto END
-		}
-	}
-END:
+	app.handler(ctx)
 	switch ctx.Status() / 100 {
 	case 2, 3:
 		ctx.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
@@ -154,4 +108,52 @@ END:
 	default:
 		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
 	}
+}
+
+//func (app *Application) handler(responsewriter http.ResponseWriter, request *http.Request) {
+func (app *Application) handler(ctx *HttpHandler) {
+	if strings.HasPrefix(ctx.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
+		file := filepath.Join(ctx.Config.WebPath, ctx.Path)
+		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
+		return
+	}
+
+	// route matching
+	entry, match := app.Find(ctx.Path)
+	if entry == nil {
+		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
+		return
+	}
+	handle := reflect.New(entry)
+	exec, ok := handle.Interface().(Handler)
+	if !ok {
+		panic("exec is not Handler")
+	}
+	exec.init(app, ctx.ResponseWriter, ctx.Request)
+	exec.parse_arguments(match)
+
+	exec.Initialize()
+	// check if status is not default value 0, Initialize is finished handler
+	if ctx.Finished() {
+		return
+	}
+
+	exec.Prepare()
+	// check if status is not default value 0, Prepare is finished handler
+	if ctx.Finished() {
+		return
+	}
+
+	method := handle.MethodByName(ctx.Method)
+	if (method == reflect.Value{}) {
+		ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+	method.Call(nil)
+	exec.Finish()
+	if ctx.Finished() {
+		return
+	}
+	// Finish handler request normally, set statusOK
+	exec.WriteHeader(http.StatusOK)
 }

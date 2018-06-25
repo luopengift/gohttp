@@ -15,6 +15,7 @@ import (
 // Handler implements http handler interface.
 // Initialize -> Prepare  -> GET/POST... -> Finish
 type Handler interface {
+	// Handler implements ServeHTTP(http.ResponseWriter, *http.Request) func.
 	http.Handler
 	// Prepare invoked before Init.
 	Prepare()
@@ -22,6 +23,7 @@ type Handler interface {
 	Initialize()
 	// Finish invoked after httpMethod func.
 	Finish()
+	WriteHeader(code int)
 	parse_arguments(match map[string]string)
 	init(*Application, http.ResponseWriter, *http.Request)
 }
@@ -155,7 +157,6 @@ func (ctx *HttpHandler) HTTPError(msg string, code int) {
 // Output response the http request. If response is sent, do not sent again.
 func (ctx *HttpHandler) Output(v interface{}, code ...int) {
 	if ctx.Finished() {
-
 		return
 	}
 	response, err := types.ToBytes(v)
@@ -163,7 +164,7 @@ func (ctx *HttpHandler) Output(v interface{}, code ...int) {
 		panic(err)
 	}
 	if len(code) == 0 {
-		ctx.output(response, 200)
+		ctx.output(response, http.StatusOK)
 	} else {
 		ctx.output(response, code[0])
 	}
