@@ -141,7 +141,6 @@ func (ctx *HttpHandler) RecvFile(name string, path string) error {
 
 // response redirect
 func (ctx *HttpHandler) Redirect(url string, code int) {
-	//ctx.ResponseWriter.status = code
 	http.Redirect(ctx.ResponseWriter, ctx.Request, url, code)
 }
 
@@ -198,10 +197,7 @@ func (ctx *HttpHandler) Render(tpl string, data interface{}) {
 
 // render html data to client
 func (ctx *HttpHandler) render(tpl *template.Template, data interface{}) {
-	//for name, value := range ctx.Header {
-	//	ctx.ResponseWriter.Header().Set(name, value)
-	//}
-	ctx.WriteHeader(http.StatusOK) //200
+	ctx.WriteHeader(http.StatusOK)
 	(*tpl).Execute(ctx.ResponseWriter, data)
 }
 
@@ -213,11 +209,11 @@ func (ctx *HttpHandler) Download(file string) {
 	}
 	f, err := os.Stat(file)
 	if err != nil {
-		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound) //404
+		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
 	if f.IsDir() {
-		ctx.HTTPError(http.StatusText(http.StatusForbidden), http.StatusForbidden) //403
+		ctx.HTTPError(http.StatusText(http.StatusForbidden), http.StatusForbidden)
 		return
 	}
 	ctx.ResponseWriter.Header().Set("Content-Type", "application/octet-stream")
