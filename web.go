@@ -124,19 +124,20 @@ func (ctx *HttpHandler) GetBody(name string) interface{} {
 	}
 }
 
-func (ctx *HttpHandler) RecvFile(name string, path string) error {
+func (ctx *HttpHandler) RecvFile(name string, path string) (string, error) {
 	file, head, err := ctx.Request.FormFile(name)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
-	f, err := os.OpenFile(filepath.Join(path, head.Filename), os.O_WRONLY|os.O_CREATE, 0644)
+	filepath := filepath.Join(path, head.Filename)
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer f.Close()
 	_, err = io.Copy(f, file)
-	return err
+	return filepath, err
 }
 
 // response redirect
