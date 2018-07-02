@@ -97,7 +97,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
 		}
 	}()
-	app.handler(ctx)
+	app.handle(ctx)
 	switch ctx.Status() / 100 {
 	case 2, 3:
 		ctx.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
@@ -110,8 +110,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 	}
 }
 
-//func (app *Application) handler(responsewriter http.ResponseWriter, request *http.Request) {
-func (app *Application) handler(ctx *HttpHandler) {
+func (app *Application) handle(ctx *HttpHandler) {
 	if strings.HasPrefix(ctx.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.Path)
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
