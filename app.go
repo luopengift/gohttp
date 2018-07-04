@@ -129,7 +129,10 @@ func (app *Application) handle(ctx *HttpHandler) {
 		panic("exec is not Handler")
 	}
 	exec.init(app, ctx.ResponseWriter, ctx.Request)
-	exec.parse_arguments(match)
+	if err := exec.parse_arguments(match); err != nil {
+		ctx.Warn("parse args error: %v", err)
+		return
+	}
 
 	exec.Initialize()
 	// check if status is not default value 0, Initialize is finished handler

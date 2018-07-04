@@ -40,11 +40,13 @@ func NewRequestReader(req *http.Request) *request {
 }
 
 // parse and handler arguments
-func (req *request) parse_arguments(match map[string]string) {
+func (req *request) parse_arguments(match map[string]string) error {
 	// parse form automatically
-	req.Request.ParseForm()
-
+	if err := req.Request.ParseForm(); err != nil {
+		return err
+	}
 	req.prepare_match_arguments(match)
+	return nil
 }
 
 // prepare match and assignment to match arguments

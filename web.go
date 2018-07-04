@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path"
@@ -24,7 +25,7 @@ type Handler interface {
 	// Finish invoked after httpMethod func.
 	Finish()
 	WriteHeader(code int)
-	parse_arguments(match map[string]string)
+	parse_arguments(match map[string]string) error
 	init(*Application, http.ResponseWriter, *http.Request)
 }
 
@@ -122,6 +123,58 @@ func (ctx *HttpHandler) GetBody(name string) interface{} {
 	} else {
 		return body[name]
 	}
+}
+
+// Get formdata, Content-Type must be multipart/form-data.
+// TODO: RemoveAll removes any temporary files associated with a Form.
+func (ctx *HttpHandler) GetForm() (map[string]string, map[string]*multipart.FileHeader, error) {
+	reader, err := ctx.Request.MultipartReader()
+	if err != nil {
+		return nil, nil, err
+	}
+	form, err := reader.ReadForm(10000)
+	if err != nil {
+		return nil, nil, err
+	}
+	values := make(map[string]string)
+	for k, v := range form.Value {
+		if len(v) > 0 {
+			values[k] = v[0]
+		}
+	}
+	files := make(map[string]*multipart.FileHeader)
+	for k, v := range form.File {
+		if len(v) > 0 {
+			files[k] = v[0]
+		}
+	}
+	return values, files, nil
+
+}
+
+//save file to disk
+func (ctx *HttpHandler) SaveFile(fh *multipart.FileHeader, path string, name ...string) (string, error) {
+	file, err := fh.Open()
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	var filename string
+	if len(name) == 0 {
+		filename = fh.Filename
+	} else {
+		filename = name[0]
+	}
+	filepath := filepath.Join(path, filename)
+	f, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return "", err
+	}
+	defer f.Close()
+	_, err = io.Copy(f, file)
+	return filepath, err
+
 }
 
 func (ctx *HttpHandler) RecvFile(name string, path string) (string, error) {
