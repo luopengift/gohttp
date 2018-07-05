@@ -40,13 +40,12 @@ func (api ApiOutput) MarshalJSON() ([]byte, error) {
 	return bytes, err
 }
 
-func (api *ApiOutput) Set(code int, msg string) {
+func (api *ApiOutput) Set(code int, msg string, errs ...error) {
 	api.Code = code
 	api.Msg = msg
-}
-
-func (api *ApiOutput) Error() string {
-	return fmt.Sprintf("%d: %s", api.Code, api.Msg)
+	if len(errs) > 0 {
+		api.Err = errs[0]
+	}
 }
 
 func (api *ApiOutput) String() string {
