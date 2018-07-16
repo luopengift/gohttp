@@ -10,6 +10,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/luopengift/types"
 )
@@ -35,6 +36,18 @@ func (ctx *Context) reset() {
 func (ctx *Context) init(resp http.ResponseWriter, req *http.Request) {
 	ctx.response = newResponseWriter(resp)
 	ctx.Request = req
+}
+
+// RemoteAddr remote addr for request, copied from net/url.stripPort
+func (ctx *Context) RemoteAddr() string {
+	colon := strings.IndexByte(ctx.Request.RemoteAddr, ':')
+	if colon == -1 {
+		return ctx.Request.RemoteAddr
+	}
+	if i := strings.IndexByte(ctx.Request.RemoteAddr, ']'); i != -1 {
+		return strings.TrimPrefix(ctx.Request.RemoteAddr[:i], "[")
+	}
+	return ctx.Request.RemoteAddr[:colon]
 }
 
 // GetCookies get cookies

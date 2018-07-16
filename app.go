@@ -96,7 +96,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime), err)
+			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
 		}
 		app.Pool.Put(ctx)
 	}()
@@ -117,12 +117,12 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 
 	switch ctx.Status() / 100 {
 	case 2, 3:
-		app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+		app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 	case 4:
-		app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+		app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 	case 5:
-		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 	default:
-		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 	}
 }
