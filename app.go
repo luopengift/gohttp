@@ -92,14 +92,26 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 	stime := time.Now()
 	ctx := app.Pool.Get().(*Context)
 	ctx.init(responsewriter, request)
-	defer func() {
+	defer func(ctx *Context) {
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
 			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
 		}
 		app.Pool.Put(ctx)
-	}()
+
+		switch ctx.Status() / 100 {
+		case 2, 3:
+			app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+		case 4:
+			app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+		case 5:
+			app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+		default:
+			app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+		}
+
+	}(ctx)
 
 	if strings.HasPrefix(ctx.URL.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.URL.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.URL.Path)
@@ -113,19 +125,9 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		return
 	}
 
-	app.Info("%v", route.method)
+	//app.Info("%v", route.method)
 
 	ctx.match = match
 	route.entry.Exec(ctx)
 
-	switch ctx.Status() / 100 {
-	case 2, 3:
-		app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-	case 4:
-		app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-	case 5:
-		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-	default:
-		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-	}
 }
