@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/luopengift/gohttp"
 )
 
 func main() {
-	client := gohttp.NewClient().Url("http://www.baidu.com").Header("Content-Type", "application/json;charset=utf-8")
+	client := gohttp.NewClient().URLString("http://www.baidu.com").Header("Content-Type", "application/json;charset=utf-8")
 	for i := 0; i <= 4; i++ {
 
 		resp, err := client.Get()
@@ -19,7 +20,7 @@ func main() {
 	for i := 0; i <= 10; i++ {
 		go func() {
 			conn, _ := pool.Get()
-			resp, err := conn.Url("http://www.baidu.com").Header("Content-Type", "application/json;charset=utf-8").Get()
+			resp, err := conn.URLString("http://www.baidu.com").Header("Content-Type", "application/json;charset=utf-8").Get()
 			fmt.Println(fmt.Sprintf("%v,%v,%p", resp.Code(), err, conn))
 			pool.Put(conn)
 		}()

@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	assets.App.RunHttp(":18081")
+	assets.App.Run(":18081")
 }

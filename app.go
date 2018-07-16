@@ -112,6 +112,9 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
+
+	app.Info("%v", route.method)
+
 	ctx.match = match
 	route.entry.Exec(ctx)
 

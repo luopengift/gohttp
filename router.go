@@ -28,7 +28,7 @@ func (f HandleFunCtx) Exec(ctx *Context) {
 	f(ctx)
 }
 
-// Entry xx
+// Entry handle implements HandleHTTP interface
 type Entry struct {
 	reflect.Type
 }
@@ -72,19 +72,11 @@ func (entry Entry) Exec(ctx *Context) {
 	exec.WriteHeader(http.StatusOK)
 }
 
-type muxEntry reflect.Type
-
 type route struct {
 	path   string
 	method string
 	regx   *regexp.Regexp
 	entry  HandleHTTP
-}
-
-func newroute(path string, handler Handler) *route {
-	rv := reflect.ValueOf(handler)
-	rt := reflect.Indirect(rv).Type()
-	return &route{path: path, regx: regexp.MustCompile(path), entry: Entry{rt}}
 }
 
 // RouterList router List
@@ -97,7 +89,9 @@ func InitRouterList() *RouterList {
 
 // Route route
 func (r *RouterList) Route(path string, handler Handler) {
-	route := newroute(path, handler)
+	rv := reflect.ValueOf(handler)
+	rt := reflect.Indirect(rv).Type()
+	route := &route{path: path, regx: regexp.MustCompile(path), entry: Entry{rt}}
 	*r = append(*r, route)
 }
 
@@ -105,7 +99,6 @@ func (r *RouterList) Route(path string, handler Handler) {
 func (r *RouterList) RouteFunc(path string, f HandleFunc) {
 	route := &route{path: path, regx: regexp.MustCompile(path), entry: f}
 	*r = append(*r, route)
-
 }
 
 // RouteFunCtx route handle func

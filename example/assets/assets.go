@@ -2,29 +2,35 @@ package assets
 
 import (
 	"fmt"
-	"github.com/luopengift/gohttp"
 	"net/http"
+
+	"github.com/luopengift/gohttp"
 )
 
+// RoutersHandler routers handler
 type RoutersHandler struct {
-	gohttp.HttpHandler
+	gohttp.BaseHTTPHandler
 }
 
+// GET method
 func (ctx *RoutersHandler) GET() {
 	ctx.Output(ctx.RouterList.String())
 	//ctx.Redirect("http://www.baidu.com", 301)
 	//ctx.Render("template/index.tpl", map[string]string{"content": "This is a test page"})
 }
 
+// POST method
 func (ctx *RoutersHandler) POST() {
 	fmt.Println("tpl post")
 	ctx.Output("tpl post")
 }
 
+// MirrorHandler mirror handler
 type MirrorHandler struct {
-	gohttp.HttpHandler
+	gohttp.BaseHTTPHandler
 }
 
+// Prepare func
 func (ctx *MirrorHandler) Prepare() {
 	if ctx.Method == "GET" {
 		ctx.Output("hello Prepare inject", 401)
@@ -34,6 +40,7 @@ func (ctx *MirrorHandler) Prepare() {
 	}
 }
 
+// Run handler entry
 func (ctx *MirrorHandler) Run() {
 	match := ctx.GetMatchArgs()
 	query := ctx.GetQueryArgs()
@@ -47,14 +54,17 @@ func (ctx *MirrorHandler) Run() {
 	ctx.Output(result)
 }
 
+// GET method
 func (ctx *MirrorHandler) GET() {
 	ctx.Run()
 }
 
+// POST method
 func (ctx *MirrorHandler) POST() {
 	ctx.Run()
 }
 
+// App application
 var App *gohttp.Application
 
 func init() {
