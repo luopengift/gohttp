@@ -4,21 +4,24 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/base64"
-	"github.com/luopengift/golibs/pool"
-	"github.com/luopengift/log"
-	"github.com/luopengift/types"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/luopengift/golibs/pool"
+	"github.com/luopengift/log"
+	"github.com/luopengift/types"
 )
 
+// ClientPool cilent pool
 type ClientPool struct {
 	*pool.Pool
 }
 
+// NewClientPool new cilent pool
 func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
 	client := func() (interface{}, error) {
 		return NewClient().Reset(), nil
@@ -27,6 +30,7 @@ func NewClientPool(maxIdle, maxOpen, timeout int) *ClientPool {
 	return &ClientPool{Pool: p}
 }
 
+// Get signel client
 func (p *ClientPool) Get() (*Client, error) {
 	one, err := p.Pool.Get()
 	if err != nil {
@@ -36,10 +40,12 @@ func (p *ClientPool) Get() (*Client, error) {
 	return one.(*Client), nil
 }
 
+// Put one client into pool
 func (p *ClientPool) Put(c *Client) error {
 	return p.Pool.Put(c)
 }
 
+// Client client
 type Client struct {
 	*http.Client
 	*http.Transport
@@ -49,6 +55,7 @@ type Client struct {
 	cookies map[string]string
 }
 
+// NewClient new client
 func NewClient() *Client {
 	c := new(Client)
 	c.Client = new(http.Client)
@@ -58,6 +65,7 @@ func NewClient() *Client {
 	return c.Reset()
 }
 
+// Reset reset
 func (c *Client) Reset() *Client {
 	c.URL = new(url.URL)
 	c.body = nil
@@ -66,23 +74,25 @@ func (c *Client) Reset() *Client {
 	return c
 }
 
-// 长连接,Default is true
+// KeepAlived ,Default is true
 func (c *Client) KeepAlived(used bool) *Client {
 	c.Transport.DisableKeepAlives = used
 	return c
 }
 
-// 强制使用HTTPS,Default is false
+// VerifySSL 强制使用HTTPS,Default is false
 func (c *Client) VerifySSL(used bool) *Client {
 	c.Transport.TLSClientConfig.InsecureSkipVerify = !used
 	return c
 }
 
+// Timeout timeout
 func (c *Client) Timeout(timeout int) *Client {
 	c.Client.Timeout = time.Duration(timeout) * time.Second
 	return c
 }
 
+// Proxy proxy
 func (c *Client) Proxy(proxy string) *Client {
 	_proxy, err := url.Parse(proxy)
 	if err != nil {
@@ -94,7 +104,8 @@ func (c *Client) Proxy(proxy string) *Client {
 
 }
 
-func (c *Client) Url(urlstr string) *Client {
+// URLString url string
+func (c *Client) URLString(urlstr string) *Client {
 	u, err := url.Parse(urlstr)
 	if err != nil {
 		log.Error("Url set fail:%v", err)
@@ -114,11 +125,13 @@ func (c *Client) Url(urlstr string) *Client {
 	return c
 }
 
+// Path path
 func (c *Client) Path(path string) *Client {
 	c.URL.Path = path
 	return c
 }
 
+// Query query params
 func (c *Client) Query(query map[string]string) *Client {
 	q := []string{}
 	for k, v := range query {
@@ -128,6 +141,7 @@ func (c *Client) Query(query map[string]string) *Client {
 	return c
 }
 
+// Body body params
 func (c *Client) Body(v interface{}) *Client {
 	if v == nil {
 		return c
@@ -141,11 +155,13 @@ func (c *Client) Body(v interface{}) *Client {
 	return c
 }
 
+// Header header
 func (c *Client) Header(k, v string) *Client {
 	c.headers[k] = v
 	return c
 }
 
+// Headers headers
 func (c *Client) Headers(kv map[string]string) *Client {
 	for k, v := range kv {
 		c.headers[k] = v
@@ -153,11 +169,13 @@ func (c *Client) Headers(kv map[string]string) *Client {
 	return c
 }
 
+// Cookie cookie
 func (c *Client) Cookie(k, v string) *Client {
 	c.cookies[k] = v
 	return c
 }
 
+// BaseAuth base auth
 func (c *Client) BaseAuth(user, pass string) *Client {
 	s := base64.StdEncoding.EncodeToString([]byte(user + ":" + pass))
 	c.Header("Authorization", "Basic "+s)
@@ -195,6 +213,7 @@ func (c *Client) doReq(method string) (*Response, error) {
 
 }
 
+// Response response
 type Response struct {
 	Status     string // e.g. "200 OK"
 	StatusCode int    // e.g. 200
@@ -204,6 +223,7 @@ type Response struct {
 	Byte       []byte
 }
 
+// NewResponse new response
 func NewResponse(resp *http.Response) (*Response, error) {
 	response := new(Response)
 	body, err := ioutil.ReadAll(resp.Body)
@@ -220,6 +240,7 @@ func NewResponse(resp *http.Response) (*Response, error) {
 	return response, nil
 }
 
+// Code status code
 func (resp *Response) Code() int {
 	return resp.StatusCode
 }
@@ -228,12 +249,22 @@ func (resp *Response) String() string {
 	return string(resp.Byte)
 }
 
+// Bytes bytes
 func (resp *Response) Bytes() []byte {
 	return resp.Byte
 }
 
-func (c *Client) Get() (*Response, error)    { return c.doReq("GET") }
-func (c *Client) Post() (*Response, error)   { return c.doReq("POST") }
-func (c *Client) Put() (*Response, error)    { return c.doReq("PUT") }
+//Get request
+func (c *Client) Get() (*Response, error) { return c.doReq("GET") }
+
+// Post request
+func (c *Client) Post() (*Response, error) { return c.doReq("POST") }
+
+// Put request
+func (c *Client) Put() (*Response, error) { return c.doReq("PUT") }
+
+//Delete request
 func (c *Client) Delete() (*Response, error) { return c.doReq("DELETE") }
-func (c *Client) Head() (*Response, error)   { return c.doReq("HEAD") }
+
+// Head request
+func (c *Client) Head() (*Response, error) { return c.doReq("HEAD") }

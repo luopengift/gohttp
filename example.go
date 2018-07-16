@@ -5,18 +5,22 @@ import (
 	"strings"
 )
 
+// RouteHandler routehandler
 type RouteHandler struct {
-	HttpHandler
+	BaseHTTPHandler
 }
 
+// GET method
 func (ctx *RouteHandler) GET() {
 	ctx.Output(ctx.RouterList.String())
 }
 
+// InfoHandler info handler
 type InfoHandler struct {
-	HttpHandler
+	BaseHTTPHandler
 }
 
+// GET method
 func (ctx *InfoHandler) GET() {
 	ctx.ResponseWriter.Header().Set("Content-Type", "text/plain")
 	result := []string{fmt.Sprintf("\nMethod: %s", ctx.Request.Method),

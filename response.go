@@ -26,7 +26,7 @@ type ResponseWriter interface {
 	Size() int
 }
 
-func NewResponseWriter(responsewriter http.ResponseWriter) *response {
+func newResponseWriter(responsewriter http.ResponseWriter) *response {
 	resp := new(response)
 	resp.ResponseWriter = responsewriter
 	return resp

@@ -1,27 +1,26 @@
-/*
-   gohttp sample http server framework
-*/
 package gohttp
 
 import (
 	"context"
-	"github.com/luopengift/log"
-	"golang.org/x/net/http2"
 	"net/http"
 	"path/filepath"
-	"reflect"
 	"runtime/debug"
 	"strings"
+	"sync"
 	"time"
+
+	"github.com/luopengift/log"
+	"golang.org/x/net/http2"
 )
 
-// Aplllication is a httpserver instance.
+// Application is a httpserver instance.
 type Application struct {
 	*Config
 	*log.Log
 	*Template
 	*RouterList
 	*http.Server
+	sync.Pool
 }
 
 // Init creates a default httpserver instance by default config.
@@ -43,11 +42,14 @@ func Init() *Application {
 		WriteTimeout:      time.Duration(app.Config.WriteTimeout) * time.Second,
 		MaxHeaderBytes:    app.Config.MaxHeaderBytes,
 	}
-	serverHttp2 := &http2.Server{
+	serverhttp2 := &http2.Server{
 		IdleTimeout: 1 * time.Minute,
 	}
-	if err := http2.ConfigureServer(app.Server, serverHttp2); err != nil {
+	if err := http2.ConfigureServer(app.Server, serverhttp2); err != nil {
 		app.Error("%v", err)
+	}
+	app.Pool.New = func() interface{} {
+		return &Context{Application: app}
 	}
 	return app
 }
@@ -55,7 +57,7 @@ func Init() *Application {
 // Run starts the server by listen address.
 // HTTP/2.0 is only supported in https,
 // If server is http mode, then HTTP/1.x will be used.
-func (app *Application) RunHttp(addr ...string) {
+func (app *Application) Run(addr ...string) {
 	if len(addr) == 1 {
 		app.Server.Addr = addr[0]
 	} else {
@@ -67,7 +69,8 @@ func (app *Application) RunHttp(addr ...string) {
 	}
 }
 
-func (app *Application) RunHttps(addr ...string) {
+// RunTLS xxx
+func (app *Application) RunTLS(addr ...string) {
 	if len(addr) == 1 {
 		app.Server.Addr = addr[0]
 	} else {
@@ -87,75 +90,39 @@ func (app *Application) Stop() error {
 // ServeHTTP is HTTP server implement method. It makes App compatible to native http handler.
 func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *http.Request) {
 	stime := time.Now()
-	// init a new http handler
-	ctx := NewHttpHandler(app, responsewriter, request)
-
+	ctx := app.Pool.Get().(*Context)
+	ctx.init(responsewriter, request)
 	defer func() {
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime), err)
+			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime), err)
 		}
+		app.Pool.Put(ctx)
 	}()
-	app.handle(ctx)
-	switch ctx.Status() / 100 {
-	case 2, 3:
-		ctx.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	case 4:
-		ctx.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	case 5:
-		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	default:
-		ctx.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.Remote, time.Since(stime))
-	}
-}
 
-func (app *Application) handle(ctx *HttpHandler) {
-	if strings.HasPrefix(ctx.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.Path, ".ico") {
-		file := filepath.Join(ctx.Config.WebPath, ctx.Path)
+	if strings.HasPrefix(ctx.URL.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.URL.Path, ".ico") {
+		file := filepath.Join(ctx.Config.WebPath, ctx.URL.Path)
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		return
 	}
 
-	// route matching
-	entry, match := app.Find(ctx.Path)
-	if entry == nil {
+	route, match := app.find(ctx.URL.Path)
+	if route == nil {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
 	}
-	handle := reflect.New(entry)
-	exec, ok := handle.Interface().(Handler)
-	if !ok {
-		panic("exec is not Handler")
-	}
-	exec.init(app, ctx.ResponseWriter, ctx.Request)
-	if err := exec.parse_arguments(match); err != nil {
-		ctx.Warn("parse args error: %v", err)
-		return
-	}
+	ctx.match = match
+	route.entry.Exec(ctx)
 
-	exec.Initialize()
-	// check if status is not default value 0, Initialize is finished handler
-	if ctx.Finished() {
-		return
+	switch ctx.Status() / 100 {
+	case 2, 3:
+		app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+	case 4:
+		app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+	case 5:
+		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
+	default:
+		app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.URL.Host, time.Since(stime))
 	}
-
-	exec.Prepare()
-	// check if status is not default value 0, Prepare is finished handler
-	if ctx.Finished() {
-		return
-	}
-
-	method := handle.MethodByName(ctx.Method)
-	if (method == reflect.Value{}) {
-		ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
-		return
-	}
-	method.Call(nil)
-	exec.Finish()
-	if ctx.Finished() {
-		return
-	}
-	// Finish handler request normally, set statusOK
-	exec.WriteHeader(http.StatusOK)
 }
