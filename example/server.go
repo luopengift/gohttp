@@ -1,4 +1,4 @@
-package assets
+package main
 
 import (
 	"fmt"
@@ -64,11 +64,9 @@ func (ctx *MirrorHandler) POST() {
 	ctx.Run()
 }
 
-// App application
-var App *gohttp.Application
-
-func init() {
-	App = gohttp.Init()
-	App.Route("^/mirror(/(?P<args>[0-9a-zA-Z]*))?$", &MirrorHandler{})
-	App.Route("^/routers$", &RoutersHandler{})
+func main() {
+	app := gohttp.Init()
+	app.Route("^/mirror(/(?P<args>[0-9a-zA-Z]*))?$", &MirrorHandler{})
+	app.Route("^/routers$", &RoutersHandler{})
+	app.Run(":18081")
 }
