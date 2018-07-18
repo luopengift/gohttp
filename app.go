@@ -110,22 +110,22 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
 			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
+		} else {
+			switch ctx.Status() / 100 {
+			case 2, 3:
+				app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+			case 4:
+				app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+			case 5:
+				app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+			default:
+				app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+			}
 		}
 		app.Pool.Put(ctx)
 
-		switch ctx.Status() / 100 {
-		case 2, 3:
-			app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-		case 4:
-			app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-		case 5:
-			app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-		default:
-			app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
-		}
-
 	}(ctx)
-
+	// handler static file
 	if strings.HasPrefix(ctx.URL.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.URL.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.URL.Path)
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
@@ -138,9 +138,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		return
 	}
 
-	//app.Info("%v", route.method)
-
 	ctx.match = match
 	route.entry.Exec(ctx)
-
+	return
 }
