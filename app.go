@@ -30,8 +30,21 @@ func Init() *Application {
 	app.Log = InitLog()
 	app.Template = InitTemplate()
 	app.RouterList = InitRouterList()
+
 	app.Route("^/_routeList$", &RouteHandler{})
 	app.Route("^/_info$", &InfoHandler{})
+
+	app.RouteFunc("/debug/pprof/", Index)
+	app.RouteFunc("/debug/pprof/cmdline", Cmdline)
+	app.RouteFunc("/debug/pprof/profile", Profile)
+	app.RouteFunc("/debug/pprof/symbol", Symbol)
+	app.RouteFunc("/debug/pprof/trace", Trace)
+
+	app.RouteFunCtx("/debug/gc/start", StartGC)
+	app.RouteFunCtx("/debug/gc/stop", StopGC)
+	app.RouteFunCtx("/debug/trace/start", StartTrace)
+	app.RouteFunCtx("/debug/trace/stop", StopTrace)
+
 	app.Server = &http.Server{
 		Addr: app.Config.Addr,
 		/** control how to handler ServeHTTP*/
