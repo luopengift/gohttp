@@ -140,5 +140,12 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 
 	ctx.match = match
 	route.entry.Exec(ctx)
+
+	if ctx.Finished() {
+		return
+	}
+	// Finish handler request normally, set statusOK
+	// TODO: sometimes status is 301, 301 etc. this bug only occur int call HandleFunc!
+	ctx.status = http.StatusOK
 	return
 }

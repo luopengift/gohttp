@@ -64,12 +64,12 @@ func (entry Entry) Exec(ctx *Context) {
 		return
 	}
 	method.Call(nil)
-	exec.Finish()
+
 	if ctx.Finished() {
 		return
 	}
-	// Finish handler request normally, set statusOK
-	exec.WriteHeader(http.StatusOK)
+	exec.Finish()
+
 }
 
 type route struct {

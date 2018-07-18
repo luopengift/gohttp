@@ -15,8 +15,11 @@ func (ctx *baz) GET() {
 
 func Test_http(t *testing.T) {
 	app := Init()
-	app.RouteFunc("/foo", func(resp http.ResponseWriter, req *http.Request) {
-		resp.Write([]byte("foo ok"))
+	app.RouteFunc("/foo", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("foo ok"))
+	})
+	app.RouteFunc("/panic", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "http://www.baidu.com", 301)
 	})
 	app.RouteFunCtx("/bar", func(ctx *Context) {
 		ctx.Output("bar ok")
