@@ -138,6 +138,11 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		return
 	}
 
+	if route.method != "" && route.method != ctx.Method {
+		ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
 	ctx.match = match
 	route.entry.Exec(ctx)
 

@@ -74,8 +74,8 @@ func (entry Entry) Exec(ctx *Context) {
 }
 
 type route struct {
-	path   string
 	method string
+	path   string
 	alias  string
 	regx   *regexp.Regexp
 	entry  HandleHTTP
@@ -89,31 +89,45 @@ func InitRouterList() *RouterList {
 	return new(RouterList)
 }
 
+func (r *RouterList) append(method, path, alias string, entry HandleHTTP) {
+	route := &route{method: method, path: path, alias: alias, regx: regexp.MustCompile(path), entry: entry}
+	*r = append(*r, route)
+}
+
 // Route route
 func (r *RouterList) Route(path string, handler Handler) {
 	rv := reflect.ValueOf(handler)
 	rt := reflect.Indirect(rv).Type()
-	route := &route{path: path, regx: regexp.MustCompile(path), entry: Entry{rt}}
-	*r = append(*r, route)
+	entry := Entry{rt}
+	r.append("", path, "", entry)
 }
 
 // RouteFunc route handle func
 func (r *RouterList) RouteFunc(path string, f HandleFunc) {
-	route := &route{path: path, regx: regexp.MustCompile(path), entry: f}
-	*r = append(*r, route)
+	r.append("", path, "", f)
 }
 
 // RouteFunCtx route handle func
 func (r *RouterList) RouteFunCtx(path string, f HandleFunCtx) {
-	route := &route{path: path, regx: regexp.MustCompile(path), entry: f}
-	*r = append(*r, route)
+	r.append("", path, "", f)
+}
+
+// RouteMethod route by method
+func (r *RouterList) RouteMethod(method, path string, f HandleFunc) {
+	r.append(method, path, "", f)
+}
+
+// RouteCtxMethod route by method
+func (r *RouterList) RouteCtxMethod(method, path string, f HandleFunCtx) {
+	r.append(method, path, "", f)
 }
 
 // RouteAlias alias path
 func (r *RouterList) RouteAlias(path, targetPath string) {
-	route := &route{path: path, regx: regexp.MustCompile(path), alias: targetPath}
-	*r = append(*r, route)
+	r.append("", path, targetPath, nil)
 }
+
+// find search route
 func (r *RouterList) find(path string) (*route, map[string]string) {
 	for _, route := range *r {
 		if match := route.regx.FindStringSubmatch(path); match != nil {
