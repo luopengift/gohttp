@@ -24,7 +24,10 @@ func Test_http(t *testing.T) {
 	app.RouteFunCtx("/bar", func(ctx *Context) {
 		ctx.Output("bar ok")
 	})
+	app.RouteAlias("/fooalias", "/foo")
+	app.RouteAlias("/ttt", "/fooalias")
 	app.Route("/baz", &baz{})
 	app.SetTLS("cert.pem", "key.pem")
+	app.Info("%#v", app.Config)
 	app.Run(":8888")
 }

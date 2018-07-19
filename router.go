@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+	"strings"
 )
 
 // HandleHTTP handle http interface
@@ -75,6 +76,7 @@ func (entry Entry) Exec(ctx *Context) {
 type route struct {
 	path   string
 	method string
+	alias  string
 	regx   *regexp.Regexp
 	entry  HandleHTTP
 }
@@ -107,9 +109,17 @@ func (r *RouterList) RouteFunCtx(path string, f HandleFunCtx) {
 	*r = append(*r, route)
 }
 
+// RouteAlias alias path
+func (r *RouterList) RouteAlias(path, targetPath string) {
+	route := &route{path: path, regx: regexp.MustCompile(path), alias: targetPath}
+	*r = append(*r, route)
+}
 func (r *RouterList) find(path string) (*route, map[string]string) {
 	for _, route := range *r {
 		if match := route.regx.FindStringSubmatch(path); match != nil {
+			if route.alias != "" {
+				return r.find(route.alias)
+			}
 			kv := make(map[string]string)
 			for key, value := range route.regx.SubexpNames() {
 				kv[value] = match[key]
@@ -122,9 +132,14 @@ func (r *RouterList) find(path string) (*route, map[string]string) {
 }
 
 func (r *RouterList) String() string {
-	str := "\nRouter Map:\n"
-	for _, route := range *r {
-		str += fmt.Sprintf("%v => %v\n", route.path, route.entry)
+	strList := make([]string, len(*r)+1)
+	strList[0] = "\nRouter Map:"
+	for idx, route := range *r {
+		if route.alias != "" {
+			strList[idx+1] = fmt.Sprintf("%v => %v\n", route.path, route.alias)
+		} else {
+			strList[idx+1] = fmt.Sprintf("%v : %v\n", route.path, route.entry)
+		}
 	}
-	return str
+	return strings.Join(strList, "")
 }
