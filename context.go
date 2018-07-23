@@ -1,7 +1,6 @@
 package gohttp
 
 import (
-	"fmt"
 	"html/template"
 	"io"
 	"io/ioutil"
@@ -78,7 +77,7 @@ func (ctx *Context) Redirect(url string, code int) {
 
 func (ctx *Context) output(response []byte, code int) {
 	if ctx.Finished() {
-		fmt.Println("[warn] output called twice!")
+		ctx.Warn("[warn] output called twice!")
 		return
 	}
 	ctx.WriteHeader(code)
@@ -254,10 +253,6 @@ func (ctx *Context) RecvFile(name string, path string) (string, error) {
 func (ctx *Context) Render(tpl string, data interface{}) {
 	path := filepath.Join(ctx.Config.WebPath, tpl)
 
-	//TODO:check it twice,not a good choice
-	if _, ok := (*ctx.Template)[path]; !ok {
-		(*ctx.Template).AddFile(path)
-	}
 	if template, ok := (*ctx.Template)[path]; !ok {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 	} else {
@@ -268,12 +263,27 @@ func (ctx *Context) Render(tpl string, data interface{}) {
 // render html data to client
 func (ctx *Context) render(tpl *template.Template, data interface{}) {
 	ctx.WriteHeader(http.StatusOK)
-	(*tpl).Execute(ctx.ResponseWriter, data)
+	tpl.Execute(ctx.ResponseWriter, data)
 }
 
 // Exec inplement HandlerHTTP interface!
-func (ctx *Context) Exec(context *Context) {
-	ctx.Info("Exec func implement HandlerHTTP intertface!!!")
+// func (ctx *Context) Exec(context *Context) {
+// 	ctx.Info("Exec func implement HandlerHTTP intertface!!!")
+// }
+
+// JSON response json data
+func (ctx *Context) JSON(v interface{}, code ...int) {
+
+}
+
+// XML response xml data
+func (ctx *Context) XML(v interface{}, code ...int) {
+
+}
+
+// HTML response html data
+func (ctx *Context) HTML(v interface{}, code ...int) {
+
 }
 
 // HEAD method

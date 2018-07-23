@@ -2,7 +2,9 @@ package gohttp
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"runtime/debug"
 	"strings"
@@ -28,22 +30,23 @@ func Init() *Application {
 	app := new(Application)
 	app.Config = InitConfig()
 	app.Log = InitLog()
-	app.Template = InitTemplate()
+	app.Template = InitTemplate(app.Config.WebPath)
 	app.RouterList = InitRouterList()
 
 	app.Route("^/_routeList$", &RouteHandler{})
 	app.Route("^/_info$", &InfoHandler{})
 
+	app.RouteAlias("/debug/pprof", "/debug/pprof/")
 	app.RouteFunc("/debug/pprof/", Index)
-	app.RouteFunc("/debug/pprof/cmdline", Cmdline)
-	app.RouteFunc("/debug/pprof/profile", Profile)
-	app.RouteFunc("/debug/pprof/symbol", Symbol)
-	app.RouteFunc("/debug/pprof/trace", Trace)
+	app.RouteFunc("^/debug/pprof/cmdline$", Cmdline)
+	app.RouteFunc("^/debug/pprof/profile$", Profile)
+	app.RouteFunc("^/debug/pprof/symbol$", Symbol)
+	app.RouteFunc("^/debug/pprof/trace$", Trace)
 
-	app.RouteFunCtx("/debug/gc/start", StartGC)
-	app.RouteFunCtx("/debug/gc/stop", StopGC)
-	app.RouteFunCtx("/debug/trace/start", StartTrace)
-	app.RouteFunCtx("/debug/trace/stop", StopTrace)
+	app.RouteFunCtx("^/debug/gc/start$", StartGC)
+	app.RouteFunCtx("^/debug/gc/stop$", StopGC)
+	app.RouteFunCtx("^/debug/trace/start$", StartTrace)
+	app.RouteFunCtx("^/debug/trace/stop$", StopTrace)
 
 	app.Server = &http.Server{
 		Addr: app.Config.Addr,
@@ -111,6 +114,11 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
 			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
 		} else {
+			if !ctx.Finished() {
+				// Finish handler request normally, set statusOK
+				// TODO: sometimes status is 301, 301 etc. this bug only occur int call HandleFunc!
+				ctx.status = http.StatusOK
+			}
 			switch ctx.Status() / 100 {
 			case 2, 3:
 				app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
@@ -128,11 +136,30 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 	// handler static file
 	if strings.HasPrefix(ctx.URL.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.URL.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.URL.Path)
+
+		f, err := os.Open(file)
+		if err != nil {
+			ctx.HTTPError(toHTTPError(err))
+			return
+		}
+		defer f.Close()
+
+		info, err := os.Stat(file)
+		if err != nil {
+			fmt.Println("jj")
+			ctx.HTTPError(toHTTPError(err))
+			return
+		}
+		// Handler dir
+		if info.IsDir() {
+			// TODO
+		}
 		http.ServeFile(ctx.ResponseWriter, ctx.Request, file)
 		return
 	}
 
 	route, match := app.find(ctx.URL.Path)
+	fmt.Println(route, match)
 	if route == nil {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
@@ -142,15 +169,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		ctx.HTTPError(http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
 		return
 	}
-
 	ctx.match = match
 	route.entry.Exec(ctx)
-
-	if ctx.Finished() {
-		return
-	}
-	// Finish handler request normally, set statusOK
-	// TODO: sometimes status is 301, 301 etc. this bug only occur int call HandleFunc!
-	ctx.status = http.StatusOK
 	return
 }

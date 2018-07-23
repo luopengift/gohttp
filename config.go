@@ -60,5 +60,6 @@ func InitConfig() *Config {
 	cfg.SetTimeout(30)
 	cfg.SetMaxHeaderBytes(1 << 20) //DefaultMaxHeaderBytes 1MB
 	cfg.SetStaticPath(".")
+	cfg.SetWebPath(".")
 	return cfg
 }

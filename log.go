@@ -1,8 +1,9 @@
 package gohttp
 
 import (
-	"github.com/luopengift/log"
 	"os"
+
+	"github.com/luopengift/log"
 )
 
 // InitLog inits gohttp loghandler

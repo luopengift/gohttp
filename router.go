@@ -81,6 +81,10 @@ type route struct {
 	entry  HandleHTTP
 }
 
+func (r route) String() string {
+	return fmt.Sprintf("method:%s, path:%s, alias:%s, entry: %v", r.method, r.path, r.alias, r.entry)
+}
+
 // RouterList router List
 type RouterList []*route
 
@@ -123,8 +127,8 @@ func (r *RouterList) RouteCtxMethod(method, path string, f HandleFunCtx) {
 }
 
 // RouteAlias alias path
-func (r *RouterList) RouteAlias(path, targetPath string) {
-	r.append("", path, targetPath, nil)
+func (r *RouterList) RouteAlias(path, alias string) {
+	r.append("", path, alias, nil)
 }
 
 // find search route
