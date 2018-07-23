@@ -18,7 +18,7 @@ import (
 type Application struct {
 	*Config
 	*log.Log
-	*Template
+	//*Template
 	*RouterList
 	*http.Server
 	sync.Pool
@@ -29,7 +29,7 @@ func Init() *Application {
 	app := new(Application)
 	app.Config = InitConfig()
 	app.Log = InitLog()
-	app.Template = InitTemplate(app.Config.WebPath)
+	//app.Template = InitTemplate(app.Config.WebPath)
 	app.RouterList = InitRouterList()
 
 	app.Route("^/_routeList$", &RouteHandler{})

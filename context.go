@@ -249,15 +249,15 @@ func (ctx *Context) RecvFile(name string, path string) (string, error) {
 	return filepath, err
 }
 
-// Render If response is sent, do not sent again
+// Render render template no cache
 func (ctx *Context) Render(tpl string, data interface{}) {
 	path := filepath.Join(ctx.Config.WebPath, tpl)
-
-	if template, ok := (*ctx.Template)[path]; !ok {
-		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
-	} else {
-		ctx.render(template, data)
+	t, err := template.ParseFiles(path)
+	if err != nil {
+		ctx.HTTPError(toHTTPError(err))
+		return
 	}
+	ctx.render(t, data)
 }
 
 // render html data to client
