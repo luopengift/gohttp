@@ -2,7 +2,6 @@ package gohttp
 
 import (
 	"html/template"
-	"strings"
 
 	"github.com/luopengift/log"
 )
@@ -36,7 +35,7 @@ func (t *Template) AddFile(tpl string) {
 // Lookup walk around path
 func (t *Template) Lookup(path string) error {
 	files, err := WalkDir(path, func(path string) bool {
-		return strings.HasSuffix(path, ".tpl")
+		return hasSuffixs(path, ".html", ".tpl")
 	})
 	if err != nil {
 		return err

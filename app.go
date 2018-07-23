@@ -2,7 +2,6 @@ package gohttp
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -146,7 +145,6 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 
 		info, err := os.Stat(file)
 		if err != nil {
-			fmt.Println("jj")
 			ctx.HTTPError(toHTTPError(err))
 			return
 		}
@@ -159,7 +157,6 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 	}
 
 	route, match := app.find(ctx.URL.Path)
-	fmt.Println(route, match)
 	if route == nil {
 		ctx.HTTPError(http.StatusText(http.StatusNotFound), http.StatusNotFound)
 		return
