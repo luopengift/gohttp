@@ -2,6 +2,7 @@ package gohttp
 
 // Config config
 type Config struct {
+	Debug             bool   `json:"debug"`
 	Addr              string `json:"addr"`
 	ReadTimeout       int    `json:"readtimeout"`
 	ReadHeaderTimeout int    `json:"readheadertime"`
@@ -12,6 +13,11 @@ type Config struct {
 	WebPath           string `json:"web_path"`
 	StaticPath        string `json:"static_path"`
 	LogFormat         string `json:"log_format"`
+}
+
+// SetDebug set debug model
+func (cfg *Config) SetDebug(debug bool) {
+	cfg.Debug = debug
 }
 
 // SetLogFormat set log format
@@ -55,6 +61,7 @@ func (cfg *Config) SetStaticPath(static string) {
 // InitConfig init config
 func InitConfig() *Config {
 	cfg := new(Config)
+	cfg.SetDebug(true)
 	cfg.SetLogFormat("%3d %s %s (%s) %s")
 	cfg.SetAddress(":18081")
 	cfg.SetTimeout(30)

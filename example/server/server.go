@@ -66,7 +66,7 @@ func (ctx *MirrorHandler) POST() {
 
 func main() {
 	app := gohttp.Init()
-	app.Route("^/mirror(/(?P<args>[0-9a-zA-Z]*))?$", &MirrorHandler{})
+	app.Route("^/mirror(/(?P<args1>[^/]*)(/(?P<args2>[^/]*))?)?$", &MirrorHandler{})
 	app.Route("^/routers$", &RoutersHandler{})
 	app.Run(":18081")
 }

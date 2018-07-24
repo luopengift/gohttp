@@ -76,13 +76,12 @@ func (entry Entry) Exec(ctx *Context) {
 type route struct {
 	method string
 	path   string
-	alias  string
 	regx   *regexp.Regexp
 	entry  HandleHTTP
 }
 
 func (r route) String() string {
-	return fmt.Sprintf("method:%s, path:%s, alias:%s, entry: %v", r.method, r.path, r.alias, r.entry)
+	return fmt.Sprintf("method:%s, path:%s, entry: %v", r.method, r.path, r.entry)
 }
 
 // RouterList router List
@@ -93,8 +92,8 @@ func InitRouterList() *RouterList {
 	return new(RouterList)
 }
 
-func (r *RouterList) append(method, path, alias string, entry HandleHTTP) {
-	route := &route{method: method, path: path, alias: alias, regx: regexp.MustCompile(path), entry: entry}
+func (r *RouterList) append(method, path string, entry HandleHTTP) {
+	route := &route{method: method, path: path, regx: regexp.MustCompile(path), entry: entry}
 	*r = append(*r, route)
 }
 
@@ -103,47 +102,39 @@ func (r *RouterList) Route(path string, handler Handler) {
 	rv := reflect.ValueOf(handler)
 	rt := reflect.Indirect(rv).Type()
 	entry := Entry{rt}
-	r.append("", path, "", entry)
+	r.append("", path, entry)
 }
 
 // RouteFunc route handle func
 func (r *RouterList) RouteFunc(path string, f HandleFunc) {
-	r.append("", path, "", f)
+	r.append("", path, f)
 }
 
 // RouteFunCtx route handle func
 func (r *RouterList) RouteFunCtx(path string, f HandleFunCtx) {
-	r.append("", path, "", f)
+	r.append("", path, f)
 }
 
 // RouteMethod route by method
 func (r *RouterList) RouteMethod(method, path string, f HandleFunc) {
-	r.append(method, path, "", f)
+	r.append(method, path, f)
 }
 
 // RouteCtxMethod route by method
 func (r *RouterList) RouteCtxMethod(method, path string, f HandleFunCtx) {
-	r.append(method, path, "", f)
-}
-
-// RouteAlias alias path
-func (r *RouterList) RouteAlias(path, alias string) {
-	r.append("", path, alias, nil)
+	r.append(method, path, f)
 }
 
 // find search route
 func (r *RouterList) find(path string) (*route, map[string]string) {
 	for _, route := range *r {
-		if match := route.regx.FindStringSubmatch(path); match != nil {
-			if route.alias != "" {
-				return r.find(route.alias)
+		if matchs := route.regx.FindStringSubmatch(path); matchs != nil {
+			match := make(map[string]string, len(matchs))
+			for idx, value := range route.regx.SubexpNames() {
+				match[value] = matchs[idx]
 			}
-			kv := make(map[string]string)
-			for key, value := range route.regx.SubexpNames() {
-				kv[value] = match[key]
-			}
-			delete(kv, "")
-			return route, kv
+			delete(match, "")
+			return route, match
 		}
 	}
 	return nil, nil
@@ -153,11 +144,7 @@ func (r *RouterList) String() string {
 	strList := make([]string, len(*r)+1)
 	strList[0] = "\nRouter Map:"
 	for idx, route := range *r {
-		if route.alias != "" {
-			strList[idx+1] = fmt.Sprintf("%v => %v\n", route.path, route.alias)
-		} else {
-			strList[idx+1] = fmt.Sprintf("%v : %v\n", route.path, route.entry)
-		}
+		strList[idx+1] = fmt.Sprintf("%v : %v\n", route.path, route.entry)
 	}
 	return strings.Join(strList, "")
 }

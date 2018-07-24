@@ -18,7 +18,7 @@ import (
 type Application struct {
 	*Config
 	*log.Log
-	//*Template
+	*Template
 	*RouterList
 	*http.Server
 	sync.Pool
@@ -29,28 +29,27 @@ func Init() *Application {
 	app := new(Application)
 	app.Config = InitConfig()
 	app.Log = InitLog()
-	//app.Template = InitTemplate(app.Config.WebPath)
 	app.RouterList = InitRouterList()
 
-	app.Route("^/_routeList$", &RouteHandler{})
-	app.Route("^/_info$", &InfoHandler{})
+	if app.Config.Debug {
+		app.Route("^/_routeList$", &RouteHandler{})
+		app.Route("^/_info$", &InfoHandler{})
 
-	app.RouteAlias("/debug/pprof", "/debug/pprof/")
-	app.RouteFunc("/debug/pprof/", Index)
-	app.RouteFunc("^/debug/pprof/cmdline$", Cmdline)
-	app.RouteFunc("^/debug/pprof/profile$", Profile)
-	app.RouteFunc("^/debug/pprof/symbol$", Symbol)
-	app.RouteFunc("^/debug/pprof/trace$", Trace)
+		//app.RouteAlias("/debug/pprof", "/debug/pprof/")
+		app.RouteFunc("^/debug/pprof/$", Index)
+		app.RouteFunc("^/debug/pprof/cmdline$", Cmdline)
+		app.RouteFunc("^/debug/pprof/profile$", Profile)
+		app.RouteFunc("^/debug/pprof/symbol$", Symbol)
+		app.RouteFunc("^/debug/pprof/trace$", Trace)
 
-	app.RouteFunCtx("^/debug/gc/start$", StartGC)
-	app.RouteFunCtx("^/debug/gc/stop$", StopGC)
-	app.RouteFunCtx("^/debug/trace/start$", StartTrace)
-	app.RouteFunCtx("^/debug/trace/stop$", StopTrace)
-
+		app.RouteFunCtx("^/debug/gc/start$", StartGC)
+		app.RouteFunCtx("^/debug/gc/stop$", StopGC)
+		app.RouteFunCtx("^/debug/trace/start$", StartTrace)
+		app.RouteFunCtx("^/debug/trace/stop$", StopTrace)
+	}
 	app.Server = &http.Server{
 		Addr: app.Config.Addr,
-		/** control how to handler ServeHTTP*/
-		// Handler:           NewRequestHandler(app),
+		// control how to handler ServeHTTP
 		Handler:           app,
 		ReadTimeout:       time.Duration(app.Config.ReadTimeout) * time.Second,
 		ReadHeaderTimeout: time.Duration(app.Config.ReadHeaderTimeout) * time.Second,
