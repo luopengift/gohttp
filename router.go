@@ -97,6 +97,16 @@ func (r *RouterList) append(method, path string, entry HandleHTTP) {
 	*r = append(*r, route)
 }
 
+// Remove remove route
+func (r *RouterList) Remove(path string) {
+	for idx, route := range *r {
+		if route.path == path {
+			*r = append((*r)[:idx], (*r)[idx+1:]...)
+			return
+		}
+	}
+}
+
 // Route route
 func (r *RouterList) Route(path string, handler Handler) {
 	rv := reflect.ValueOf(handler)
