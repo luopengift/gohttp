@@ -25,7 +25,7 @@ func (api APIOutput) MarshalJSON() ([]byte, error) {
 	fmt.Fprintf(&buf, `"data":`)
 	b, err := json.Marshal(api.Data)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%v, %v", err, api)
 	}
 	_, err = buf.Write(b)
 
