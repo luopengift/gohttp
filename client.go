@@ -242,15 +242,24 @@ func NewResponse(resp *http.Response) (*Response, error) {
 
 // Code status code
 func (resp *Response) Code() int {
+	if resp == nil {
+		return 0
+	}
 	return resp.StatusCode
 }
 
 func (resp *Response) String() string {
+	if resp == nil {
+		return ""
+	}
 	return string(resp.Byte)
 }
 
 // Bytes bytes
 func (resp *Response) Bytes() []byte {
+	if resp == nil {
+		return nil
+	}
 	return resp.Byte
 }
 
