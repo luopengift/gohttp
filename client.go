@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/base64"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -203,7 +204,7 @@ func (c *Client) doReq(method string) (*Response, error) {
 		log.Error("client do fail:%v", err)
 		return nil, err
 	}
-
+	defer resp.Body.Close()
 	response, err := NewResponse(resp)
 	if err != nil {
 		log.Error("response read fail:%v", err)
@@ -225,12 +226,11 @@ type Response struct {
 
 // NewResponse new response
 func NewResponse(resp *http.Response) (*Response, error) {
-	response := new(Response)
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	response := new(Response)
 	response.Status = resp.Status
 	response.StatusCode = resp.StatusCode
 	response.Proto = resp.Proto
@@ -242,24 +242,20 @@ func NewResponse(resp *http.Response) (*Response, error) {
 
 // Code status code
 func (resp *Response) Code() int {
-	if resp == nil {
-		return 0
-	}
 	return resp.StatusCode
 }
 
+// JSON render json format
+func (resp *Response) JSON(v interface{}) error {
+	return json.Unmarshal(resp.Bytes(), v)
+}
+
 func (resp *Response) String() string {
-	if resp == nil {
-		return ""
-	}
 	return string(resp.Byte)
 }
 
 // Bytes bytes
 func (resp *Response) Bytes() []byte {
-	if resp == nil {
-		return nil
-	}
 	return resp.Byte
 }
 
