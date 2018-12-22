@@ -115,6 +115,13 @@ func (r *RouterList) Route(path string, handler Handler) {
 	r.append("", path, entry)
 }
 
+// RouteStdHandler route wapper by net/http.Handler
+func (r *RouterList) RouteStdHandler(path string, h http.Handler) {
+	r.RouteFunCtx(path, func(ctx *Context) {
+		h.ServeHTTP(ctx.ResponseWriter, ctx.Request)
+	})
+}
+
 // RouteFunc route handle func
 func (r *RouterList) RouteFunc(path string, f HandleFunc) {
 	r.append("", path, f)

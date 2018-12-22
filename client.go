@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -133,10 +134,10 @@ func (c *Client) Path(path string) *Client {
 }
 
 // Query query params
-func (c *Client) Query(query map[string]string) *Client {
+func (c *Client) Query(query map[string]interface{}) *Client {
 	q := []string{}
 	for k, v := range query {
-		q = append(q, k+"="+url.QueryEscape(v))
+		q = append(q, k+"="+url.QueryEscape(fmt.Sprintf("%v", v)))
 	}
 	c.URL.RawQuery = strings.Join(q, "&")
 	return c
