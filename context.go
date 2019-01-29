@@ -58,7 +58,7 @@ func (ctx *Context) GetCookies() []*http.Cookie {
 func (ctx *Context) GetCookie(name string) string {
 	cookie, err := ctx.Request.Cookie(name)
 	if err != nil {
-		panic(err)
+		return ""
 	}
 	return cookie.Value
 }

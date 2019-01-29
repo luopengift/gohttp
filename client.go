@@ -185,7 +185,6 @@ func (c *Client) BaseAuth(user, pass string) *Client {
 }
 
 func (c *Client) doReq(method string) (*Response, error) {
-
 	req, err := http.NewRequest(method, c.URL.String(), c.body)
 	if err != nil {
 		log.Error("new request fail:%v", err)
