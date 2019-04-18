@@ -2,17 +2,17 @@ package gohttp
 
 // Config config
 type Config struct {
-	Debug             bool   `json:"debug"`
-	Addr              string `json:"addr"`
-	ReadTimeout       int    `json:"readtimeout"`
-	ReadHeaderTimeout int    `json:"readheadertime"`
-	WriteTimeout      int    `json:"writetime"`
-	MaxHeaderBytes    int    `json:"maxheaderbytes"`
-	CertFile          string `json:"cert"`
-	KeyFile           string `json:"key"`
-	WebPath           string `json:"web_path"`
-	StaticPath        string `json:"static_path"`
-	LogFormat         string `json:"log_format"`
+	Debug             bool     `json:"debug" yaml:"debug"`
+	Addr              string   `json:"addr" yaml:"addr"`
+	ReadTimeout       int      `json:"readtimeout" yaml:"readtimeout"`
+	ReadHeaderTimeout int      `json:"readheadertime" yaml:"readheadertime"`
+	WriteTimeout      int      `json:"writetime" yaml:"writetime"`
+	MaxHeaderBytes    int      `json:"maxheaderbytes" yaml:"maxheaderbytes"`
+	CertFile          string   `json:"cert" yaml:"cert"`
+	KeyFile           string   `json:"key" yaml:"key"`
+	WebPath           string   `json:"web_path" yaml:"web_path"`
+	StaticPath        []string `json:"static_path" yaml:"static_path"`
+	LogFormat         string   `json:"log_format" yaml:"log_format"`
 }
 
 // SetDebug set debug model
@@ -54,8 +54,8 @@ func (cfg *Config) SetWebPath(web string) {
 }
 
 // SetStaticPath set static path
-func (cfg *Config) SetStaticPath(static string) {
-	cfg.StaticPath = static
+func (cfg *Config) SetStaticPath(static ...string) {
+	cfg.StaticPath = append(cfg.StaticPath, static...)
 }
 
 // InitConfig init config

@@ -31,6 +31,6 @@ func Test_http(t *testing.T) {
 	app.SetTLS("cert.pem", "key.pem")
 	app.SetStaticPath("/static")
 	//app.SetWebPath("/static")
-	app.Info("%#v", app.Config)
+	app.Log.Infof("%#v", app.Config)
 	app.Run(":8888")
 }

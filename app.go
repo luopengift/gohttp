@@ -6,18 +6,16 @@ import (
 	"os"
 	"path/filepath"
 	"runtime/debug"
-	"strings"
 	"sync"
 	"time"
 
-	"github.com/luopengift/log"
 	"golang.org/x/net/http2"
 )
 
 // Application is a httpserver instance.
 type Application struct {
 	*Config
-	*log.Log
+	Log Logger
 	*Template
 	*RouterList
 	*http.Server
@@ -60,7 +58,7 @@ func Init() *Application {
 		IdleTimeout: 1 * time.Minute,
 	}
 	if err := http2.ConfigureServer(app.Server, serverhttp2); err != nil {
-		app.Error("%v", err)
+		app.Log.Errorf("%v", err)
 	}
 	app.Pool.New = func() interface{} {
 		return &Context{Application: app}
@@ -77,7 +75,7 @@ func (app *Application) Run(addr ...string) {
 	} else {
 		app.Server.Addr = app.Config.Addr
 	}
-	app.Info("Http start %s", app.Server.Addr)
+	app.Log.Infof("Http start %s", app.Server.Addr)
 	if err := app.Server.ListenAndServe(); err != nil {
 		panic(err)
 	}
@@ -90,7 +88,7 @@ func (app *Application) RunTLS(addr ...string) {
 	} else {
 		app.Server.Addr = app.Config.Addr
 	}
-	app.Info("Https start %s", app.Server.Addr)
+	app.Log.Infof("Https start %s", app.Server.Addr)
 	if err := app.Server.ListenAndServeTLS(app.Config.CertFile, app.Config.KeyFile); err != nil {
 		panic(err)
 	}
@@ -110,7 +108,7 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 		if err := recover(); err != nil {
 			debug.PrintStack()
 			ctx.HTTPError(http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError) //500
-			ctx.Error(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
+			app.Log.Errorf(app.LogFormat+" | %v", ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime), err)
 		} else {
 			if !ctx.Finished() {
 				// Finish handler request normally, set statusOK
@@ -119,20 +117,20 @@ func (app *Application) ServeHTTP(responsewriter http.ResponseWriter, request *h
 			}
 			switch ctx.Status() / 100 {
 			case 2, 3:
-				app.Info(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+				app.Log.Infof(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 			case 4:
-				app.Warn(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+				app.Log.Warnf(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 			case 5:
-				app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+				app.Log.Errorf(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 			default:
-				app.Error(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
+				app.Log.Errorf(app.LogFormat, ctx.Status(), ctx.Method, ctx.URL, ctx.RemoteAddr(), time.Since(stime))
 			}
 		}
 		app.Pool.Put(ctx)
 
 	}(ctx)
 	// handler static file
-	if strings.HasPrefix(ctx.URL.Path, ctx.Config.StaticPath) || hasSuffixs(ctx.URL.Path, ".ico") {
+	if hasPrefixs(ctx.URL.Path, ctx.Config.StaticPath...) || hasSuffixs(ctx.URL.Path, ".ico") {
 		file := filepath.Join(ctx.Config.WebPath, ctx.URL.Path)
 
 		f, err := os.Open(file)

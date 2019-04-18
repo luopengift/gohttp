@@ -2,20 +2,16 @@ package gohttp
 
 import (
 	"html/template"
-
-	"github.com/luopengift/log"
 )
 
 // Template template
 type Template map[string]*template.Template
 
 // InitTemplate init template
-func InitTemplate(webpath string) *Template {
+func InitTemplate(webpath string) (*Template, error) {
 	template := &Template{}
-	if err := template.Lookup(webpath); err != nil {
-		log.GetLogger("gohttp").Warn("init Template: %v", err)
-	}
-	return template
+	err := template.Lookup(webpath)
+	return template, err
 }
 
 // Add string to template

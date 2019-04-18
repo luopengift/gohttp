@@ -43,7 +43,7 @@ func (entry Entry) Exec(ctx *Context) {
 	}
 	exec.init(ctx)
 	if err := exec.parseArgs(); err != nil {
-		ctx.Warn("parse args error: %v", err)
+		ctx.Log.Warnf("parse args error: %v", err)
 		return
 	}
 

@@ -77,7 +77,7 @@ func (ctx *Context) Redirect(url string, code int) {
 
 func (ctx *Context) output(response []byte, code int) {
 	if ctx.Finished() {
-		ctx.Warn("[warn] output called twice!")
+		ctx.Log.Warnf("[warn] output called twice!")
 		return
 	}
 	ctx.WriteHeader(code)
@@ -160,7 +160,7 @@ func (ctx *Context) GetBodyArgs() []byte {
 // Download file download response by file path.
 func (ctx *Context) Download(file string) {
 	if ctx.Finished() {
-		ctx.Error("HttpHandler is end!")
+		ctx.Log.Errorf("HttpHandler is end!")
 		return
 	}
 	f, err := os.Stat(file)
